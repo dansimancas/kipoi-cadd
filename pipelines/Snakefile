@@ -1,0 +1,23 @@
+ALL_CHROMOSOMES = list(range(1, 23))
+
+rule all:
+    input:
+        expand(('/s/project/kipoi-cadd/data/processed/kipoi/chr{c}' + 
+                '/variant_labels.parq'), c=ALL_CHROMOSOMES)
+
+
+rule write_parquet_for_chromosome:
+    input:
+        all_variants = ('/s/project/kipoi-cadd/data/processed/kipoi/all_variants'),
+    output:
+        parq = '/s/project/kipoi-cadd/data/processed/kipoi/chr{chr}/variant_labels.parq'
+    run:
+        import dask.dataframe as dd
+        import pandas as pd
+        from fastparquet import write
+
+        parquet = dd.read_parquet(input.all_variants, index="ID")
+        temp = parquet[parquet.Chrom == wildcards.chr]
+        chrom_df = temp.compute()
+        chrom_df.Chrom = chrom_df.Chrom.astype('int64')
+        write(output.parq, chrom_df)

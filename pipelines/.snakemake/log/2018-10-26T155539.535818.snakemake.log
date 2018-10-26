@@ -1,0 +1,10 @@
+Error in rule filter_gnomad_vcf:
+    jobid: 0
+    output: /s/project/kipoi-cadd/data/processed/kipoi/chr1/variant_labels.parq
+
+RuleException:
+ModuleNotFoundError in line 18 of /data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/Snakefile:
+No module named 'fastparquet'
+  File "/data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/Snakefile", line 18, in __rule_filter_gnomad_vcf
+  File "/opt/modules/i12g/anaconda/3-5.0.1/lib/python3.6/concurrent/futures/thread.py", line 56, in run
+Exiting because a job execution failed. Look above for error message
