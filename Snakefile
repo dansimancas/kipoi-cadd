@@ -1,22 +1,23 @@
+import pandas as pd
+
 ALL_CHROMOSOMES = list(range(1, 23))
 # ALL_CHROMOSOMES = [22]
 
 rule all:
     input:
-        #expand(('/s/project/kipoi-cadd/data/processed/kipoi/chr{c}' + 
+        #expand(('data/processed/kipoi/chr{c}' + 
         #        '/variant_labels.parq'), c=ALL_CHROMOSOMES)
-        expand(('/s/project/kipoi-cadd/data/processed/kipoi/chr{c}' +
+        expand(('data/processed/kipoi/chr{c}' +
                 '/variants.vcf.gz'), c=ALL_CHROMOSOMES)
 
 
 rule write_parquet_for_chromosome:
     input:
-        all_variants = ('/s/project/kipoi-cadd/data/processed/kipoi/all_variants'),
+        all_variants = ('data/processed/kipoi/all_variants'),
     output:
-        parq = '/s/project/kipoi-cadd/data/processed/kipoi/chr{chr}/variant_labels.parq'
+        parq = 'data/processed/kipoi/chr{chr}/variant_labels.parq'
     run:
         import dask.dataframe as dd
-        import pandas as pd
         from fastparquet import write
 
         parquet = dd.read_parquet(input.all_variants, index="ID")
@@ -28,14 +29,13 @@ rule write_parquet_for_chromosome:
 
 rule write_vcf_for_chromosome:
     input:
-        parq = '/s/project/kipoi-cadd/data/processed/kipoi/chr{chr}/variant_labels.parq'
+        parq = 'data/processed/kipoi/chr{chr}/variant_labels.parq'
     output:
-        vcf = temp('/s/project/kipoi-cadd/data/processed/kipoi/chr{chr}/variants.vcf')
+        vcf = temp('data/processed/kipoi/chr{chr}/variants.vcf')
     run:
         from fastparquet import ParquetFile
         from m_kipoi.config import VCF_HEADER  # hg19 based
         from collections import OrderedDict
-        import pandas as pd
         
         pf = ParquetFile(input.parq)
         df = pf.to_pandas()
@@ -59,9 +59,9 @@ rule tabix_vcf:
     """Tabix the vcf
     """
     input:
-        vcf = "/s/project/kipoi-cadd/data/processed/kipoi/chr{chr}/variants.vcf"
+        vcf = "data/processed/kipoi/chr{chr}/variants.vcf"
     output:
-        vcf_gz = "/s/project/kipoi-cadd/data/processed/kipoi/chr{chr}/variants.vcf.gz",
+        vcf_gz = "data/processed/kipoi/chr{chr}/variants.vcf.gz",
     shell:
         """
         # Sort the vcf file
