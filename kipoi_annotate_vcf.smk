@@ -8,6 +8,12 @@ GTF_FILE = "data/raw/dataloader_files/Homo_sapiens.GRCh37.75.filtered.gtf"
 FASTA_FILE = "data/raw/dataloader_files/hg19.fa"
 # MODELS_FULL = "KipoiSplice/4cons"
 MODELS_FULL = "DeepBind/Homo_sapiens/RBP/D00084.001_RNAcompete_A1CF"
+ALL_CHROMOSOMES = [18]
+
+rule all:
+    input:
+        expand(("data/processed/splicing/chr{d}/annotated_vcf/variants" +
+                "/models/" + MODELS_FULL + ".h5"), d=ALL_CHROMOSOMES)
 
 rule create__env:
     """Create one conda environment for all splicing models
@@ -29,8 +35,11 @@ rule annotate_vcf:
     output:
         h5 = "data/processed/splicing/chr{d}/annotated_vcf/{vcf_file}/models/{model}.h5"
     params:
-        dl_kwargs = json.dumps({"gtf_file": os.path.abspath(GTF_FILE),
-                                "fasta_file": os.path.abspath(FASTA_FILE)}),
+        if 'DeepBind' in ENV_NAME:
+            dl_kwargs = json.dumps({"fasta_file": os.path.abspath(FASTA_FILE)}),
+        else:
+            dl_kwargs = json.dumps({"gtf_file": os.path.abspath(GTF_FILE),
+                                    "fasta_file": os.path.abspath(FASTA_FILE)}),
     shell:
         """
         mkdir -p `dirname {output.h5}`
