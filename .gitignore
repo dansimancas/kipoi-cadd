@@ -2,3 +2,7 @@ data/*
 data
 */.ipynb_checkpoints/*
 */.snakemake/*
+.DS_Store
+*/.DS_Store/
+.ipynb_checkpoints/*
+.snakemake/*
