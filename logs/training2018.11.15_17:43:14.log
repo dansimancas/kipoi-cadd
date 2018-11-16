@@ -1,9 +1,0 @@
-2018-11-15 17:43:14,114 - INFO - Started script.
-2018-11-15 17:43:14,116 - INFO - 
-	Got parameters:
-	- batch_size: 3200
-	- num_epochs: 50
-	- num_steps: 10
-	- loss: None
-	- metrics: None
-2018-11-15 17:43:14,164 - INFO - Started fitting model.
