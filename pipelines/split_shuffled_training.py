@@ -24,9 +24,8 @@ class OrderedSet(collections.Set):
 
 def get_batch_indexes(index_list,
                       batch_size,
-                      file, output,
-                      num_batches=None,
-                      sep=','):
+                      output,
+                      num_batches=None):
 
     num_indexes = len(index_list)
     amount_batches = (num_indexes // batch_size) + 1
@@ -38,9 +37,7 @@ def get_batch_indexes(index_list,
         start = (i) * batch_size
         end = min(num_indexes, start + batch_size)
         extraction = {
-            'file': file,
             'output': output + str(i + 1) + ".csv",
-            'sep': sep,
             'index_list': set(index_list[start:end])
         }
         batch_indexes.append(extraction)
@@ -48,13 +45,12 @@ def get_batch_indexes(index_list,
     return(batch_indexes)
 
 
-def generate_many_batches_fast(extraction):
+def generate_many_batches_fast(filename, sep, extraction):
     i = 0
-    file = extraction[0].get('file')
 
-    with open(file) as input_file:
+    with open(filename) as input_file:
         # Obtain header of our master input file
-        header = next(input_file)
+        header = "ix" + sep + next(input_file)
 
         # Initialize batch values and headers of output files
         batch_values = {}
@@ -71,14 +67,14 @@ def generate_many_batches_fast(extraction):
             while not_found:
                 if row_number in extraction[li].get('index_list'):
                     batch_values[li]['ixs'].append(row_number)
-                    batch_values[li]['rows'].append(row)
+                    batch_values[li]['rows'].append(str(row_number) + sep + row)
                     i += 1
                     not_found = False
                 li += 1
                 if li == len(extraction):
                     break
 
-            if i >= 10000:
+            if i >= 1000000:
                 print("\nFinished ", i, " lines.")
                 # Persist when having classified 10000 lines to free memory
                 for j in range(len(extraction)):
@@ -91,8 +87,8 @@ def generate_many_batches_fast(extraction):
                     # Now we reduce the size of search for extraction
                     print("List had", len(extraction[j].get('index_list')),
                           "elements.")
-                    prev = OrderedSet(extraction[j].get('index_list'))
-                    curr = prev - OrderedSet(batch_values[j]['ixs'])
+                    prev = set(extraction[j].get('index_list'))
+                    curr = prev - set(batch_values[j]['ixs'])
                     extraction[j]['index_list'] = set(curr)
                     print("Now it has", len(extraction[j].get('index_list')),
                           "elements.")
@@ -128,7 +124,7 @@ if __name__ == '__main__':
     training_imputed = ("/s/project/kipoi-cadd/data/raw/v1.3/training_data/" +
                         "training_data.imputed.csv")
     output = ("/s/project/kipoi-cadd/data/raw/v1.3/training_data/" +
-              "shuffle_splits/tests/")
+              "shuffle_splits/training/")
     shuffled_index_file = (
         "/s/project/kipoi-cadd/data/raw/v1.3/training_data/shuffle_splits/" +
         "shuffled_index.pickle")
@@ -143,8 +139,7 @@ if __name__ == '__main__':
             shuffled_index = pickle.load(f)
 
         batches = get_batch_indexes(
-            shuffled_index, 10000, training_imputed, output, num_batches=None,
-            sep=',')
+            shuffled_index, 10000, output, num_batches=None)
 
         with open(batches_index, 'wb') as f:
             pickle.dump(batches, f)
@@ -155,9 +150,11 @@ if __name__ == '__main__':
     logger.info("Finished loading/generating batches. Ended with, " +
                 str(len(batches)) + ".")
 
-    test_batches = batches[:3]
+    
+    # test_batches = batches[:3]
 
-    generate_many_batches_fast(test_batches)
+    generate_many_batches_fast(training_imputed, ",", batches)
+
     end = time.time()
     logger.info(
         "Total elapsed time: {:.2f} minutes.".format((end - start) / 60))
