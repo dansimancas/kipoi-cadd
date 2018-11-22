@@ -150,6 +150,7 @@ if __name__ == '__main__':
     logger.info("Finished loading/generating batches. Ended with, " +
                 str(len(batches)) + ".")
 
+    
     # test_batches = batches[:3]
 
     generate_many_batches_fast(training_imputed, ",", batches)
