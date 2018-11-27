@@ -10,3 +10,4 @@ data
 .snakemake/*
 logs/*
 */__pycache__/*
+pipelines/.snakemake/
