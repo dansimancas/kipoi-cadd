@@ -1,9 +1,12 @@
 data/*
 data
 */.ipynb_checkpoints/*
+**/.ipynb_checkpoints/*
+**/.snakemake/*
 */.snakemake/*
 .DS_Store
 */.DS_Store/
 .ipynb_checkpoints/*
 .snakemake/*
 logs/*
+*/__pycache__/*
