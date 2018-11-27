@@ -139,7 +139,7 @@ def test_put_10000_variants():
             row_number = 0
             for row in tqdm(input_file):
                 variant_id = varids[row_number]
-                ser_data = cadd_serialize_numpy_row(
+                ser_data = cadd_serialize_string_row(
                     row, variant_id, separator, np.float16, 0)
 
                 buf = ser_data.to_buffer()
@@ -148,14 +148,28 @@ def test_put_10000_variants():
 
                 row_number += 1
 
-                if row_number > 10: break
 
-
-# def test_get_10000_variants():
-
+def test_get_10000_variants():
+    ddir = "/s/project/kipoi-cadd/data"
+    with open(ddir + "/raw/v1.3/training_data/sample_variant_ids.pkl", 
+              'rb') as f:
+        varids = pickle.load(f)
+    varids = varids.sample()
+    lmdbpath = ddir + "/tests/lmdb_3"
+    env = lmdb.Environment(lmdbpath, lock=False)
+    notfound = 0
+    with env.begin(write=False, buffers=True) as txn:
+        for var in varids:
+            temp_buf = txn.get(var.encode('ascii'))
+            if temp_buf: buf = bytes(temp_buf)
+            if not temp_buf:
+                print(var)
+                notfound += 1
+    
+    print("Not found", notfound)
 
 def test_pyarrow_serialization():
     pass
 
 
-test_put_10000_variants()
+# test_put_10000_variants()

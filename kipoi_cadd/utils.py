@@ -37,7 +37,7 @@ def generate_variant_ids(inputfile, outputfile, separator='\t'):
                                'Alt': 'str'})
     #                        nrows=10000)
     variant_ids = input_df.apply(
-        lambda row: ':'.join([str(row[0]), str(row[1]), row[2], ("['" +
+        lambda row: ':'.join([row[0], str(row[1]), row[2], ("['" +
                              row[3] + "']")]), axis=1)
         
     with open(outputfile, 'wb') as f:

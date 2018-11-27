@@ -1,5 +1,6 @@
 data/*
 data
+tests/__pycache__/test_lmdb.cpython-36-PYTEST.pyc
 */.ipynb_checkpoints/*
 **/.ipynb_checkpoints/*
 **/.snakemake/*
@@ -10,4 +11,5 @@ data
 .snakemake/*
 logs/*
 */__pycache__/*
+tests/__pycache__/*
 pipelines/.snakemake/
