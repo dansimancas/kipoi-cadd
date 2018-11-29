@@ -16,7 +16,7 @@ import numpy as np
 class CaddDataset(BatchDataset):
     def __init__(self, 
                  variant_ids, version="1.3", exclude_idx=None,
-                 include_idx=None):
+                 include_idx=None, separator=',', map_size=83904000):
 
         self.version = version
 
@@ -29,15 +29,17 @@ class CaddDataset(BatchDataset):
         if exclude_idx is not None:
             self.df_index = self.df_index.loc[~exclude_idx]
 
-        self.lmdb_cadd_path = "my_path{version}.lmdb"
+        # self.lmdb_cadd_path = get_data_dir() + f"/raw/v{version}/training_data/lmdb"
+        self.lmdb_cadd_path = get_data_dir() + "/tests/lmdb_3/"
         self.lmdb_cadd = None
+        self._map_size = map_size
 
     def __len__(self):
         return len(self.df_index)
 
     def __getitem__(self, idx):
         if self.lmdb_cadd is None:
-            self.lmdb_cadd = lmdb.Environment(self.lmdb_cadd_path)
+            self.lmdb_cadd = lmdb.Environment(self.lmdb_cadd_path, map_size=self._map_size, lock=False)
 
         variant_id = self.df_index.loc[idx]
         with self.lmdb_cadd.begin(write=False, buffers=True) as txn:
@@ -45,17 +47,34 @@ class CaddDataset(BatchDataset):
 
         return pa.deserialize(buf)
 
+    def __get_n_items__(self, var_idxs):
+        if self.lmdb_cadd is None:
+            self.lmdb_cadd = lmdb.Environment(self.lmdb_cadd_path, map_size=self._map_size, lock=False)
+
+        items_df = None
+
+        with self.lmdb_cadd.begin(write=False, buffers=True) as txn:
+            for var in var_idxs:
+                buf = bytes(txn.get(var.encode('ascii')))
+                desbuf = pa.deserialize(buf)
+                data = np.insert(desbuf['inputs'], 0, desbuf['targets'])
+                if items_df is None:
+                    items_df = pd.DataFrame([data], index=[desbuf['metadata']['variant_id']])
+                else:
+                    items_df = items_df.append(pd.DataFrame([data], index=[desbuf['metadata']['variant_id']]))
+        return items_df
+
+
 
 def load_variant_ids(filename):
-    with open(filename, 'r') as f:
+    with open(filename, 'rb') as f:
         rn = pickle.load(f)
     return rn
 
 
-def cadd_training_set():
+def cadd_training_set(include_idx):
     # return (train, valid) datasets
-    return CaddDataset(
-        exclude_idx=valid_idx), CaddDataset(include_idx=valid_idx)
+    return CaddDataset(include_idx=valid_idx)
 
 
 def cadd_serialize_string_row(row, variant_id, separator, dtype=np.float16, target_col=0):
@@ -139,3 +158,7 @@ def create_lmdb(inputfile=get_data_dir() + "/raw/v1.3/training_data/training_dat
 
 def cadd_training(version='1.3'):
     return dd.read_csv(f'/s/project/kipoi-cadd/data/v{version}/training_data.tsv.gz')
+
+
+#cd = CaddDataset("/s/project/kipoi-cadd/data/raw/v1.3/training_data/sample_variant_ids.pkl")
+#cd.__get_n_items__(cd.df_index.sample(10))

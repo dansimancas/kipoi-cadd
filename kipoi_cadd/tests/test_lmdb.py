@@ -134,7 +134,7 @@ def test_put_10000_variants():
     inputfile = (get_data_dir() +
         "/raw/v1.3/training_data/training_data.imputed.csv")
     separator = ','
-    lmdbpath = ddir + "/tests/lmdb_3"
+    lmdbpath = ddir + "/tests/lmdb_3/"
 
     logger.info(("Started script. Parameters are:\n\t" +
                  "inputfile: " + inputfile + "\n\t" + 
@@ -176,7 +176,7 @@ def test_put_10000_variants():
                 row_number += 1
                 if row_number >= 10000: break
 
-    logger.info("Finished putting" + str(row_number) + "rows to lmdb.")
+    logger.info("Finished putting " + str(row_number) + " rows to lmdb.")
     end = time.time()
     logger.info("Total elapsed time: {:.2f} minutes.".format(
         (end - start) / 60))
@@ -187,16 +187,15 @@ def test_get_10000_variants():
     with open(ddir + "/raw/v1.3/training_data/sample_variant_ids.pkl", 
               'rb') as f:
         varids = pickle.load(f)
-    varids = varids.sample()
+    varids = varids.sample(len(varids))
     lmdbpath = ddir + "/tests/lmdb_3"
     env = lmdb.Environment(lmdbpath, lock=False)
+    num_vars = 0
     with env.begin(write=False, buffers=True) as txn:
         for var in varids:
             bytes(txn.get(var.encode('ascii')))
-
+            num_vars += 1
+    print("Finished getting", num_vars, "rows.")
 
 def test_pyarrow_serialization():
     pass
-
-
-test_put_10000_variants()
