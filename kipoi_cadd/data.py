@@ -2,9 +2,14 @@
 """
 import dask.dataframe as dd
 from kipoi.data import BatchDataset
+from kipoi_cadd.config import get_data_dir, get_package_dir
 import pyarrow as pa
 import lmdb
 import pickle
+import pandas as pd
+import logging
+from tqdm import tqdm
+import time
 import numpy as np
 
 
@@ -71,30 +76,66 @@ def cadd_serialize_numpy_row(row, variant_id, separator, dtype=np.float16, targe
     return pa.serialize(data)
 
 
-def create_lmdb(inputfile, output_lmdb_file, variant_ids):
-    varids = load_variant_ids(variant_ids)
-    map_size = varids.shape[0] * 10e10
-    print(map_size)
-    env = lmdb.Environment(lmdbpath , map_size=20e10, max_dbs=0, lock=False)
+def create_lmdb(inputfile=get_data_dir() + "/raw/v1.3/training_data/training_data.imputed.csv",
+                output_lmdb_file=get_data_dir() + "/raw/v1.3/training_data/lmdb",
+                variant_ids=get_data_dir() + "/raw/v1.3/training_data/variant_ids.pkl",
+                separator=',',
+                log=get_package_dir() + "/logs/lmdb/put.log"):
+
+    start = time.time()
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
+    handler = logging.FileHandler(log)
+    handler.setFormatter(
+        logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+    logger.addHandler(handler)
+
+    logger.info(("Started script. Parameters are:\n\t" +
+                 "inputfile: " + inputfile + "\n\t" + 
+                 "output_lmdb_file: " + output_lmdb_file + "\n\t" + 
+                 "separator: '" + separator + "'\n\t" + 
+                 "variant_ids: " + variant_ids
+                 ))
+
+    with open(variant_ids, 'rb') as f:
+        varids = pickle.load(f)
+    row_example = pd.read_csv(inputfile,
+                              sep=separator,
+                              nrows=1,
+                              skiprows=1,
+                              header=None)
+    map_size = cadd_serialize_numpy_row(
+        row_example.values[0], varids[0], separator,
+        np.float16, 0).to_buffer().size
+
+    multipl = 1.9
+    map_size = int(map_size * varids.shape[0] * multipl)
+
+    logger.info("Using map_size: " + str(map_size) + ". The multiplier applied was " + str(multipl))
+    env = lmdb.Environment(output_lmdb_file , map_size=map_size, max_dbs=0, lock=False)
 
     with env.begin(write=True, buffers=True) as txn:
         with open(inputfile) as input_file:
             _ = next(input_file)  # skip header line
             row_number = 0
             for row in tqdm(input_file):
-                row = np.array(row.split(separator))
+                variant_id = varids[row_number]
+                ser_data = cadd_serialize_string_row(
+                    row, variant_id, separator, np.float16, 0)
 
-                data = {"inputs": row[1:],
-                    "targets": row[0],
-                    "metadata": {"row_idx": row_number}}
-
-                buf = pa.serialize(data).to_buffer()
-                txn.put(data['metadata']['variant_id'].encode('ascii'), buf)
+                buf = ser_data.to_buffer()
+                try:
+                    txn.put(variant_id.encode('ascii'), buf)
+                except lmdb.MapFullError as err:
+                    logger.error(str(err) + ". Exiting the program.")
+                    sys.exit()
 
                 row_number += 1
 
-                if row_number > 10: break
-
+    logger.info("Finished putting" + str(row_number) + "rows to lmdb.")
+    end = time.time()
+    logger.info("Total elapsed time: {:.2f} minutes.".format(
+        (end - start) / 60))
 
 def cadd_training(version='1.3'):
     return dd.read_csv(f'/s/project/kipoi-cadd/data/v{version}/training_data.tsv.gz')

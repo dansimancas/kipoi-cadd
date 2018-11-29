@@ -7,10 +7,14 @@ import numpy as np
 from kipoi_cadd.config import get_data_dir
 import shutil
 import pickle
+import logging
 from kipoi_cadd.data import cadd_serialize_string_row
 from kipoi_cadd.data import cadd_serialize_numpy_row
 import os
+import time
 from tqdm import tqdm
+import sys
+import datetime
 
 
 def test_lmdb_get_put():
@@ -66,7 +70,6 @@ def test_lmdb_get_put_with_variant_id():
         row_example = None
         for row in tqdm(input_file):
             row = np.array(row.split(separator), dtype=np.float16)
-            print(row.nbytes, row.dtype)
             rows["variant_ids"].append(varids.iloc[row_number, 0])
             rows["row_infos"].append(row)
             row_number += 1
@@ -113,14 +116,33 @@ def test_lmdb_get_put_with_variant_id():
 
 
 def test_put_10000_variants():
+    start = time.time()
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
+    handler = logging.FileHandler(
+        "/s/project/kipoi-cadd/logs/lmdb/put.log")
+    handler.setFormatter(
+        logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+    logger.addHandler(handler)
+
     ddir = "/s/project/kipoi-cadd/data"
-    with open(ddir + "/raw/v1.3/training_data/sample_variant_ids.pkl", 
-              'rb') as f:
+    variantidpath = ddir + "/raw/v1.3/training_data/sample_variant_ids.pkl"
+
+    with open(variantidpath, 'rb') as f:
         varids = pickle.load(f)
+
     inputfile = (get_data_dir() +
         "/raw/v1.3/training_data/training_data.imputed.csv")
     separator = ','
     lmdbpath = ddir + "/tests/lmdb_3"
+
+    logger.info(("Started script. Parameters are:\n\t" +
+                 "inputfile: " + inputfile + "\n\t" + 
+                 "lmdbpath: " + lmdbpath + "\n\t" + 
+                 "separator: '" + separator + "'\n\t" + 
+                 "variantidpath: " + variantidpath
+                 ))
+
     row_example = pd.read_csv(inputfile,
                               sep=separator,
                               nrows=1,
@@ -129,8 +151,11 @@ def test_put_10000_variants():
     map_size = cadd_serialize_numpy_row(
         row_example.values[0], varids[0], separator,
         np.float16, 0).to_buffer().size
-    map_size = int(map_size * varids.shape[0] * 1.2)
 
+    multipl = 1.9
+    map_size = int(map_size * varids.shape[0] * multipl)
+
+    logger.info("Using map_size: " + str(map_size) + ". The multiplier applied was " + str(multipl))
     env = lmdb.Environment(lmdbpath , map_size=map_size, max_dbs=0, lock=False)
 
     with env.begin(write=True, buffers=True) as txn:
@@ -143,10 +168,18 @@ def test_put_10000_variants():
                     row, variant_id, separator, np.float16, 0)
 
                 buf = ser_data.to_buffer()
-                print(buf.size)
-                txn.put(variant_id.encode('ascii'), buf)
-
+                try:
+                    txn.put(variant_id.encode('ascii'), buf)
+                except lmdb.MapFullError as err:
+                    logger.error(str(err) + ". Exiting the program.")
+                    sys.exit()
                 row_number += 1
+                if row_number >= 10000: break
+
+    logger.info("Finished putting" + str(row_number) + "rows to lmdb.")
+    end = time.time()
+    logger.info("Total elapsed time: {:.2f} minutes.".format(
+        (end - start) / 60))
 
 
 def test_get_10000_variants():
@@ -157,19 +190,13 @@ def test_get_10000_variants():
     varids = varids.sample()
     lmdbpath = ddir + "/tests/lmdb_3"
     env = lmdb.Environment(lmdbpath, lock=False)
-    notfound = 0
     with env.begin(write=False, buffers=True) as txn:
         for var in varids:
-            temp_buf = txn.get(var.encode('ascii'))
-            if temp_buf: buf = bytes(temp_buf)
-            if not temp_buf:
-                print(var)
-                notfound += 1
-    
-    print("Not found", notfound)
+            bytes(txn.get(var.encode('ascii')))
+
 
 def test_pyarrow_serialization():
     pass
 
 
-# test_put_10000_variants()
+test_put_10000_variants()

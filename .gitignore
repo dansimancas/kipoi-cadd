@@ -11,5 +11,6 @@ tests/__pycache__/test_lmdb.cpython-36-PYTEST.pyc
 .snakemake/*
 logs/*
 */__pycache__/*
+**/__pycache__/*
 tests/__pycache__/*
 pipelines/.snakemake/

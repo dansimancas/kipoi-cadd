@@ -16,7 +16,7 @@ if __name__ == '__main__':
     # handler = logging.StreamHandler()
     handler = logging.FileHandler(
         "/s/project/kipoi-cadd/logs/training" +
-        datetime.datetime.now().strftime("%Y.%m.%d_%H:%M:%S") + ".log")
+        datetime.datetime.now().strftime("%Y%m%d%H%M%S") + ".log")
     handler.setFormatter(
         logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
     logger.addHandler(handler)
