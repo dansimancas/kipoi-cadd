@@ -14,3 +14,4 @@ logs/*
 */__pycache__/*
 tests/__pycache__/*
 pipelines/.snakemake/
+kipoi_cadd/__pycache__/*

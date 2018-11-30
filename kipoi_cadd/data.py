@@ -7,12 +7,14 @@ import pyarrow as pa
 import lmdb
 import pickle
 import pandas as pd
+import sys
 import logging
 from tqdm import tqdm
 import time
 import numpy as np
+import gin.tf
 
-
+# @gin.configurable
 class CaddDataset(BatchDataset):
     def __init__(self, 
                  variant_ids, version="1.3", exclude_idx=None,
@@ -27,10 +29,11 @@ class CaddDataset(BatchDataset):
         if include_idx is not None:
             self.df_index = self.df_index.loc[include_idx]
         if exclude_idx is not None:
-            self.df_index = self.df_index.loc[~exclude_idx]
+            bad_df = self.df_index.index.isin(exclude_idx)
+            self.df_index = self.df_index[~bad_df]
 
-        # self.lmdb_cadd_path = get_data_dir() + f"/raw/v{version}/training_data/lmdb"
-        self.lmdb_cadd_path = get_data_dir() + "/tests/lmdb_3/"
+        self.lmdb_cadd_path = get_data_dir() + f"/raw/v{version}/training_data/lmdb"
+        # self.lmdb_cadd_path = get_data_dir() + "/tests/lmdb_3/"
         self.lmdb_cadd = None
         self._map_size = map_size
 
@@ -47,7 +50,7 @@ class CaddDataset(BatchDataset):
 
         return pa.deserialize(buf)
 
-    def __get_n_items__(self, var_idxs):
+    def get_n_items(self, var_idxs):
         if self.lmdb_cadd is None:
             self.lmdb_cadd = lmdb.Environment(self.lmdb_cadd_path, map_size=self._map_size, lock=False)
 
@@ -65,16 +68,16 @@ class CaddDataset(BatchDataset):
         return items_df
 
 
-
 def load_variant_ids(filename):
     with open(filename, 'rb') as f:
         rn = pickle.load(f)
     return rn
 
-
-def cadd_training_set(include_idx):
-    # return (train, valid) datasets
-    return CaddDataset(include_idx=valid_idx)
+# @gin.configurable
+def cadd_train_test_data(lmdb_file, train_id_file, validd_id_file):
+    df_index = load_variant_ids(variant_ids)
+    train_idx = df_index.sample(frac=0.9).index.values
+    return CaddDataset(variant_ids, include_idx=train_idx), CaddDataset(variant_ids, exclude_idx=train_idx)
 
 
 def cadd_serialize_string_row(row, variant_id, separator, dtype=np.float16, target_col=0):
@@ -151,10 +154,11 @@ def create_lmdb(inputfile=get_data_dir() + "/raw/v1.3/training_data/training_dat
 
                 row_number += 1
 
-    logger.info("Finished putting" + str(row_number) + "rows to lmdb.")
+    logger.info("Finished putting " + str(row_number) + " rows to lmdb.")
     end = time.time()
     logger.info("Total elapsed time: {:.2f} minutes.".format(
         (end - start) / 60))
+
 
 def cadd_training(version='1.3'):
     return dd.read_csv(f'/s/project/kipoi-cadd/data/v{version}/training_data.tsv.gz')
@@ -162,3 +166,4 @@ def cadd_training(version='1.3'):
 
 #cd = CaddDataset("/s/project/kipoi-cadd/data/raw/v1.3/training_data/sample_variant_ids.pkl")
 #cd.__get_n_items__(cd.df_index.sample(10))
+# cadd_train_test_data("/s/project/kipoi-cadd/data/raw/v1.3/training_data/sample_variant_ids.pkl")
