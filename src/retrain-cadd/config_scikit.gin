@@ -9,26 +9,17 @@ import kipoi_cadd
 # model.gin
 # --------------------------------------------
 # model
-train.trainer_cls = @KerasTrainer
-train.model = @logistic_regression_keras()
-logistic_regression_keras.n_features = 1063
-logistic_regression_keras.l2_regularization = 1.0
-logistic_regression_keras.learning_rate = 0.015
+train.trainer_cls = @ScikitTrainer
+train.model = @logistic_regression_scikit()
+logistic_regression_scikit.alpha = 1.0
+logistic_regression_scikit.learning_rate = 'optimal'
+logistic_regression_scikit.n_jobs = 10
 
 # --------------------------------------------
 # training
-train.batch_size = 512
-train.num_workers = 10
-
-# train-specific
-train.epochs = 100
-train.early_stop_patience = 4
-train.train_epoch_frac = 1.0  # optionally subset the training set
-train.valid_epoch_frac = 1.0  # optionally subset the validation set
-
-# ==================================================================
-# CaddDataset
-# CaddDataset.cycle = False
+train.batch_size = 64
+train.num_workers = 5
+train.shuffle = True
 
 # ==================================================================
 # problem.gin
@@ -42,4 +33,3 @@ cadd_train_valid_data.valid_id_file = "/s/project/kipoi-cadd/data/raw/v1.3/train
 
 # --------------------------------------------
 # evaluation
-train.eval_metric = @ClassificationMetrics()
