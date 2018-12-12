@@ -138,7 +138,7 @@ class CaddBatchDataset(BatchDataset):
         return batch
 
 
-@gin.configurable
+# @gin.configurable
 class CaddDataset(Dataset):
     def __init__(self, lmbd_dir,
                  variant_id_file, version="1.3",
@@ -184,18 +184,19 @@ class CaddDataset(Dataset):
         return item
 
 
-    def load_all(self):
+    def load_all(self, batch_size=64, num_workers=10):
         D = len(self.__getitem__(0)['inputs'])
         N = self.__len__()
         X = np.zeros((N, D), dtype=np.float16)
-        y = np.zeros((N, 1), dtype=np.float16)
-        it = self.batch_iter(self.lmdb_cadd_path, variant_ids_file)
+        y = np.zeros(N, dtype=np.float16)
+        it = self.batch_iter(batch_size=batch_size, shuffle=True, num_workers=num_workers)
 
         i = 0
-        for sample in tqdm(it, total=N):
-            X[i] = sample['inputs']
-            y[i] = sample['targets']
-        
+        for sample in tqdm(it):
+            bs = sample['inputs'].shape[0]
+            X[i:i+bs,:] = sample['inputs']
+            y[i:i+bs] = sample['targets']
+
         return X, y
 
 
@@ -206,7 +207,7 @@ def train_test_split_indexes(variant_id_file, test_size, random_state=1):
     return train_vars, test_vars
 
 
-@gin.configurable
+# @gin.configurable
 def cadd_train_valid_data(lmdb_dir, train_id_file, valid_id_file):
     return CaddDataset(lmdb_dir, train_id_file), CaddDataset(lmdb_dir, valid_id_file)
 

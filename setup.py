@@ -8,11 +8,12 @@ with open('README.md') as readme_file:
 
 requirements = [
     "cloudpickle",
-    "gin-train",
+    "blosc",
     "concise",
     "dask",
     "deepdish",
     "gin-config",
+    "gin-train",
     "joblib",
     "kipoi",
     "lmdb",
@@ -21,6 +22,7 @@ requirements = [
     "pytest",
     "pyvcf",
     "scikit-learn",
+    "torch",
     "tensorflow==1.9",
     "toolz",
 ]
