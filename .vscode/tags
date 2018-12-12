@@ -1,0 +1,302 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+BatchDataset	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/data.py	/^from kipoi.data import BatchDataset$/;"	kind:namespace	line:4
+CaddDataset	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/data.py	/^class CaddDataset(BatchDataset):$/;"	kind:class	line:9
+Dense	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_with_keras.py	/^from keras.layers import Dense$/;"	kind:namespace	line:9
+Dense	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_with_keras.py	/^from keras.layers import Dense$/;"	kind:namespace	line:9
+K	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/config.py	/^    import keras.backend as K$/;"	kind:namespace	line:19
+LogisticRegression	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/train_cadd.py	/^from dask_ml.linear_model import LogisticRegression$/;"	kind:namespace	line:4
+OrderedSet	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/utils.py	/^class OrderedSet(collections.Set):$/;"	kind:class	line:6
+OrderedSet	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/split_shuffled_training.py	/^class OrderedSet(collections.Set):$/;"	kind:class	line:11
+OrderedSet	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/split_shuffled_training.py	/^class OrderedSet(collections.Set):$/;"	kind:class	line:11
+SGD	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_with_keras.py	/^from keras.optimizers import SGD$/;"	kind:namespace	line:11
+SGD	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_with_keras.py	/^from keras.optimizers import SGD$/;"	kind:namespace	line:11
+SGDClassifier	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_with_scikit.py	/^from sklearn.linear_model import SGDClassifier$/;"	kind:namespace	line:10
+SGDClassifier	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_with_scikit.py	/^from sklearn.linear_model import SGDClassifier$/;"	kind:namespace	line:10
+Sequential	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/models.py	/^from keras.models import Sequential$/;"	kind:namespace	line:3
+Sequential	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_with_keras.py	/^from keras.models import Sequential$/;"	kind:namespace	line:10
+Sequential	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_with_keras.py	/^from keras.models import Sequential$/;"	kind:namespace	line:10
+__contains__	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/utils.py	/^    def __contains__(self, element):$/;"	kind:member	line:13
+__contains__	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/split_shuffled_training.py	/^    def __contains__(self, element):$/;"	kind:member	line:18
+__contains__	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/split_shuffled_training.py	/^    def __contains__(self, element):$/;"	kind:member	line:18
+__getitem__	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/data.py	/^    def __getitem__(self, idx):$/;"	kind:member	line:28
+__init__	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/data.py	/^    def __init__(self, version="1.3", exclude_idx=None, include_idx=None):$/;"	kind:member	line:10
+__init__	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/utils.py	/^    def __init__(self, iterable=()):$/;"	kind:member	line:7
+__init__	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/split_shuffled_training.py	/^    def __init__(self, iterable=()):$/;"	kind:member	line:12
+__init__	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/split_shuffled_training.py	/^    def __init__(self, iterable=()):$/;"	kind:member	line:12
+__init__.py	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/__init__.py	1;"	kind:file	line:1
+__init__.py	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/cli/__init__.py	1;"	kind:file	line:1
+__iter__	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/utils.py	/^    def __iter__(self):$/;"	kind:member	line:16
+__iter__	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/split_shuffled_training.py	/^    def __iter__(self):$/;"	kind:member	line:21
+__iter__	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/split_shuffled_training.py	/^    def __iter__(self):$/;"	kind:member	line:21
+__len__	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/data.py	/^    def __len__(self):$/;"	kind:member	line:25
+__len__	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/utils.py	/^    def __len__(self):$/;"	kind:member	line:10
+__len__	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/split_shuffled_training.py	/^    def __len__(self):$/;"	kind:member	line:15
+__len__	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/split_shuffled_training.py	/^    def __len__(self):$/;"	kind:member	line:15
+__main__.py	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/__main__.py	1;"	kind:file	line:1
+argh	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/__main__.py	/^import argh$/;"	kind:namespace	line:1
+argparse	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/train_cadd.py	/^import argparse$/;"	kind:namespace	line:6
+argparse	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_generator.py	/^import argparse$/;"	kind:namespace	line:1
+argparse	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_with_keras.py	/^import argparse$/;"	kind:namespace	line:1
+argparse	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_with_scikit.py	/^import argparse$/;"	kind:namespace	line:1
+argparse	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_generator.py	/^import argparse$/;"	kind:namespace	line:1
+argparse	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_with_keras.py	/^import argparse$/;"	kind:namespace	line:1
+argparse	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_with_scikit.py	/^import argparse$/;"	kind:namespace	line:1
+args	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/train_cadd.py	/^    args = parser.parse_args()$/;"	kind:variable	line:80
+args	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_generator.py	/^    args = parser.parse_args()$/;"	kind:variable	line:56
+args	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_generator.py	/^    args = parser.parse_args()$/;"	kind:variable	line:56
+args_str	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_generator.py	/^    args_str = reduce($/;"	kind:variable	line:58
+args_str	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_generator.py	/^    args_str = reduce($/;"	kind:variable	line:58
+author	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/setup.py	/^    author="Daniela Simancas",$/;"	kind:variable	line:37
+author_email	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/setup.py	/^    author_email='simancas@in.tum.de',$/;"	kind:variable	line:38
+batches	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/split_shuffled_training.py	/^            batches = pickle.load(f)$/;"	kind:variable	line:148
+batches	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/split_shuffled_training.py	/^        batches = get_batch_indexes($/;"	kind:variable	line:141
+batches	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/split_shuffled_training.py	/^            batches = pickle.load(f)$/;"	kind:variable	line:148
+batches	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/split_shuffled_training.py	/^        batches = get_batch_indexes($/;"	kind:variable	line:141
+batches_index	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/split_shuffled_training.py	/^    batches_index = ($/;"	kind:variable	line:131
+batches_index	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/split_shuffled_training.py	/^    batches_index = ($/;"	kind:variable	line:131
+cadd_df	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/.ipynb_checkpoints/load_cadd_training-checkpoint.py	/^cadd_df = dd.read_csv('\/s\/project\/kipoi-cadd\/data\/v1.3\/training_data.tsv.gz')$/;"	kind:variable	line:4
+cadd_df	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/load_cadd_training.py	/^cadd_df = dd.read_csv('\/s\/project\/kipoi-cadd\/data\/v1.3\/training_data.tsv.gz')$/;"	kind:variable	line:4
+cadd_df	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/load_cadd_training.py	/^cadd_df = dd.read_csv('\/s\/project\/kipoi-cadd\/data\/v1.3\/training_data.tsv.gz')$/;"	kind:variable	line:4
+cadd_training	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/data.py	/^def cadd_training(version='1.3'):$/;"	kind:function	line:60
+cadd_training_set	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/data.py	/^def cadd_training_set():$/;"	kind:function	line:37
+clf	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_generator.py	/^        clf = train_with_scikit.train(args.batch_size, args.num_epochs,$/;"	kind:variable	line:122
+clf	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_generator.py	/^        clf = train_with_scikit.train(args.batch_size, args.num_epochs,$/;"	kind:variable	line:122
+clf_file	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_generator.py	/^        clf_file = ("\/s\/project\/kipoi-cadd\/data\/models\/" + str(args.library)$/;"	kind:variable	line:117
+clf_file	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_generator.py	/^        clf_file = ("\/s\/project\/kipoi-cadd\/data\/models\/" + str(args.library)$/;"	kind:variable	line:117
+cli	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/__init__.py	/^from . import cli$/;"	kind:namespace	line:2
+collections	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/utils.py	/^import collections$/;"	kind:namespace	line:1
+collections	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/split_shuffled_training.py	/^import collections$/;"	kind:namespace	line:7
+collections	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/split_shuffled_training.py	/^import collections$/;"	kind:namespace	line:7
+config.py	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/config.py	1;"	kind:file	line:1
+confusion_matrix_dask	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/train_cadd.py	/^def confusion_matrix_dask(truth, predictions, labels_list=[]):$/;"	kind:function	line:10
+create_lmdb	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/data.py	/^def create_lmdb(df, output_lmdb_file):$/;"	kind:function	line:42
+create_tf_session	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/config.py	/^def create_tf_session(visiblegpus, per_process_gpu_memory_fraction=0.45):$/;"	kind:function	line:16
+csv	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/split_shuffled_training.py	/^import csv$/;"	kind:namespace	line:3
+csv	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/split_shuffled_training.py	/^import csv$/;"	kind:namespace	line:3
+dask	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/data.py	/^import dask.dataframe as dd$/;"	kind:namespace	line:3
+dask	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/train_cadd.py	/^import dask$/;"	kind:namespace	line:1
+dask	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/train_cadd.py	/^import dask.dataframe as dd$/;"	kind:namespace	line:2
+dask	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/.ipynb_checkpoints/load_cadd_training-checkpoint.py	/^import dask.dataframe as dd$/;"	kind:namespace	line:1
+dask	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/load_cadd_training.py	/^import dask.dataframe as dd$/;"	kind:namespace	line:1
+dask	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/load_cadd_training.py	/^import dask.dataframe as dd$/;"	kind:namespace	line:1
+data	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/__init__.py	/^from . import data$/;"	kind:namespace	line:1
+data.py	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/data.py	1;"	kind:file	line:1
+dataloaders.py	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/dataloaders.py	1;"	kind:file	line:1
+datetime	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/split_shuffled_training.py	/^import datetime$/;"	kind:namespace	line:6
+datetime	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_generator.py	/^import datetime$/;"	kind:namespace	line:2
+datetime	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_with_keras.py	/^import datetime$/;"	kind:namespace	line:2
+datetime	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_with_scikit.py	/^import datetime$/;"	kind:namespace	line:2
+datetime	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/split_shuffled_training.py	/^import datetime$/;"	kind:namespace	line:6
+datetime	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_generator.py	/^import datetime$/;"	kind:namespace	line:2
+datetime	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_with_keras.py	/^import datetime$/;"	kind:namespace	line:2
+datetime	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_with_scikit.py	/^import datetime$/;"	kind:namespace	line:2
+dd	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/data.py	/^import dask.dataframe as dd$/;"	kind:namespace	line:3
+dd	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/train_cadd.py	/^import dask.dataframe as dd$/;"	kind:namespace	line:2
+dd	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/.ipynb_checkpoints/load_cadd_training-checkpoint.py	/^import dask.dataframe as dd$/;"	kind:namespace	line:1
+dd	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/load_cadd_training.py	/^import dask.dataframe as dd$/;"	kind:namespace	line:1
+dd	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/load_cadd_training.py	/^import dask.dataframe as dd$/;"	kind:namespace	line:1
+description	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/train_cadd.py	/^        description="Train a linear regression model for CADD using Dask.")$/;"	kind:variable	line:73
+description	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/setup.py	/^    description="CADD extension for Kipoi: code command-line tool",$/;"	kind:variable	line:36
+end	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/split_shuffled_training.py	/^    end = time.time()$/;"	kind:variable	line:157
+end	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_generator.py	/^    end = time.time()$/;"	kind:variable	line:142
+end	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/split_shuffled_training.py	/^    end = time.time()$/;"	kind:variable	line:158
+end	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_generator.py	/^    end = time.time()$/;"	kind:variable	line:142
+entry_points	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/setup.py	/^    entry_points={$/;"	kind:variable	line:52
+extras_require	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/setup.py	/^    extras_require={$/;"	kind:variable	line:43
+fc_nn	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/models.py	/^def fc_nn():$/;"	kind:function	line:13
+find_packages	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/setup.py	/^from setuptools import setup, find_packages$/;"	kind:namespace	line:4
+generate_many_batches_fast	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/dataloaders.py	/^def generate_many_batches_fast(filename, sep, extraction):$/;"	kind:function	line:6
+generate_many_batches_fast	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/split_shuffled_training.py	/^def generate_many_batches_fast(filename, sep, extraction):$/;"	kind:function	line:48
+generate_many_batches_fast	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/split_shuffled_training.py	/^def generate_many_batches_fast(filename, sep, extraction):$/;"	kind:function	line:48
+get_batch_indexes	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/split_shuffled_training.py	/^def get_batch_indexes(index_list,$/;"	kind:function	line:25
+get_batch_indexes	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/split_shuffled_training.py	/^def get_batch_indexes(index_list,$/;"	kind:function	line:25
+get_data_dir	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/config.py	/^def get_data_dir():$/;"	kind:function	line:3
+get_data_dir	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/tests/test_lmdb.py	/^from kipoi_cadd.config import get_data_dir$/;"	kind:namespace	line:7
+handler	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/split_shuffled_training.py	/^    handler = logging.FileHandler($/;"	kind:variable	line:116
+handler	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_generator.py	/^    handler = logging.FileHandler($/;"	kind:variable	line:17
+handler	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/split_shuffled_training.py	/^    handler = logging.FileHandler($/;"	kind:variable	line:116
+handler	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_generator.py	/^    handler = logging.FileHandler($/;"	kind:variable	line:17
+help	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_generator.py	/^                        help="Number of examples per batch.")$/;"	kind:variable	line:31
+help	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_generator.py	/^                        help="Number of examples per batch.")$/;"	kind:variable	line:31
+inspect	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/config.py	/^    import inspect$/;"	kind:namespace	line:6
+install_requires	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/setup.py	/^    install_requires=requirements,$/;"	kind:variable	line:42
+joblib	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_with_scikit.py	/^from sklearn.externals import joblib$/;"	kind:namespace	line:11
+joblib	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_with_scikit.py	/^from sklearn.externals import joblib$/;"	kind:namespace	line:11
+json	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/utils.py	/^import json$/;"	kind:namespace	line:3
+keras	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/config.py	/^    import keras.backend as K$/;"	kind:namespace	line:19
+keras	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/models.py	/^import keras.layers as kl$/;"	kind:namespace	line:4
+keywords	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/setup.py	/^    keywords=["model zoo", "deep learning",$/;"	kind:variable	line:56
+kl	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/models.py	/^import keras.layers as kl$/;"	kind:namespace	line:4
+l2	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_with_keras.py	/^from keras.regularizers import l2$/;"	kind:namespace	line:12
+l2	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_with_keras.py	/^from keras.regularizers import l2$/;"	kind:namespace	line:12
+license	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/setup.py	/^    license="...",$/;"	kind:variable	line:54
+lmdb	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/data.py	/^import lmdb$/;"	kind:namespace	line:6
+lmdb	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/tests/test_lmdb.py	/^import lmdb$/;"	kind:namespace	line:3
+load_batch	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_with_keras.py	/^def load_batch(directory, batch_size, sep=','):$/;"	kind:function	line:15
+load_batch	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_with_scikit.py	/^def load_batch(directory, batch_size, sep=','):$/;"	kind:function	line:14
+load_batch	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_with_keras.py	/^def load_batch(directory, batch_size, sep=','):$/;"	kind:function	line:15
+load_batch	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_with_scikit.py	/^def load_batch(directory, batch_size, sep=','):$/;"	kind:function	line:14
+load_cadd_training-checkpoint.py	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/.ipynb_checkpoints/load_cadd_training-checkpoint.py	1;"	kind:file	line:1
+load_cadd_training.py	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/load_cadd_training.py	1;"	kind:file	line:1
+load_cadd_training.py	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/load_cadd_training.py	1;"	kind:file	line:1
+logger	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/split_shuffled_training.py	/^    logger = logging.getLogger(__name__)$/;"	kind:variable	line:113
+logger	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_generator.py	/^    logger = logging.getLogger(__name__)$/;"	kind:variable	line:14
+logger	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/split_shuffled_training.py	/^    logger = logging.getLogger(__name__)$/;"	kind:variable	line:113
+logger	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_generator.py	/^    logger = logging.getLogger(__name__)$/;"	kind:variable	line:14
+logging	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/split_shuffled_training.py	/^import logging$/;"	kind:namespace	line:5
+logging	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_generator.py	/^import logging$/;"	kind:namespace	line:3
+logging	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_with_keras.py	/^import logging$/;"	kind:namespace	line:3
+logging	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_with_scikit.py	/^import logging$/;"	kind:namespace	line:3
+logging	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/split_shuffled_training.py	/^import logging$/;"	kind:namespace	line:5
+logging	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_generator.py	/^import logging$/;"	kind:namespace	line:3
+logging	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_with_keras.py	/^import logging$/;"	kind:namespace	line:3
+logging	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_with_scikit.py	/^import logging$/;"	kind:namespace	line:3
+logistic_regression	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/models.py	/^def logistic_regression(regularization):$/;"	kind:function	line:7
+long_description	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/setup.py	/^    long_description=readme,$/;"	kind:variable	line:40
+main	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/__main__.py	/^def main():$/;"	kind:function	line:12
+metrics.py	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/metrics.py	1;"	kind:file	line:1
+model_file	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_generator.py	/^        model_file = ("\/s\/project\/kipoi-cadd\/data\/models\/" + str(args.library)$/;"	kind:variable	line:95
+model_file	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_generator.py	/^        model_file = ("\/s\/project\/kipoi-cadd\/data\/models\/" + str(args.library)$/;"	kind:variable	line:95
+models.py	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/models.py	1;"	kind:file	line:1
+name	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/setup.py	/^    name='kipoi-cadd',$/;"	kind:variable	line:34
+np	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/train_cadd.py	/^import numpy as np$/;"	kind:namespace	line:5
+np	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/tests/test_lmdb.py	/^import numpy as np$/;"	kind:namespace	line:6
+os	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/__main__.py	/^    import os$/;"	kind:namespace	line:7
+os	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/config.py	/^    import os$/;"	kind:namespace	line:17
+os	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/config.py	/^    import os$/;"	kind:namespace	line:7
+os	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/split_shuffled_training.py	/^import os$/;"	kind:namespace	line:1
+os	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_generator.py	/^import os$/;"	kind:namespace	line:4
+os	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_with_keras.py	/^import os$/;"	kind:namespace	line:4
+os	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_with_scikit.py	/^import os$/;"	kind:namespace	line:4
+os	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/split_shuffled_training.py	/^import os$/;"	kind:namespace	line:1
+os	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_generator.py	/^import os$/;"	kind:namespace	line:4
+os	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_with_keras.py	/^import os$/;"	kind:namespace	line:4
+os	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_with_scikit.py	/^import os$/;"	kind:namespace	line:4
+output	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/split_shuffled_training.py	/^    output = ("\/s\/project\/kipoi-cadd\/data\/raw\/v1.3\/training_data\/" +$/;"	kind:variable	line:126
+output	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/split_shuffled_training.py	/^    output = ("\/s\/project\/kipoi-cadd\/data\/raw\/v1.3\/training_data\/" +$/;"	kind:variable	line:126
+pa	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/data.py	/^import pyarrow as pa$/;"	kind:namespace	line:5
+pa	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/tests/test_lmdb.py	/^import pyarrow as pa$/;"	kind:namespace	line:5
+package_data	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/setup.py	/^    package_data={'kipoi_cadd': ['logging.conf']},$/;"	kind:variable	line:59
+packages	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/setup.py	/^    packages=find_packages(),$/;"	kind:variable	line:41
+parser	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/train_cadd.py	/^    parser = argparse.ArgumentParser($/;"	kind:variable	line:72
+parser	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_generator.py	/^    batches of data.")$/;"	kind:variable	line:27
+parser	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_generator.py	/^    batches of data.")$/;"	kind:variable	line:27
+pd	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_with_keras.py	/^import pandas as pd$/;"	kind:namespace	line:7
+pd	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_with_scikit.py	/^import pandas as pd$/;"	kind:namespace	line:7
+pd	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_with_keras.py	/^import pandas as pd$/;"	kind:namespace	line:7
+pd	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_with_scikit.py	/^import pandas as pd$/;"	kind:namespace	line:7
+pd	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/tests/test_lmdb.py	/^import pandas as pd$/;"	kind:namespace	line:4
+pickle	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/train_cadd.py	/^import pickle$/;"	kind:namespace	line:7
+pickle	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/split_shuffled_training.py	/^import pickle$/;"	kind:namespace	line:2
+pickle	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_generator.py	/^import pickle$/;"	kind:namespace	line:5
+pickle	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_with_keras.py	/^import pickle$/;"	kind:namespace	line:5
+pickle	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_with_scikit.py	/^import pickle$/;"	kind:namespace	line:5
+pickle	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/split_shuffled_training.py	/^import pickle$/;"	kind:namespace	line:2
+pickle	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_generator.py	/^import pickle$/;"	kind:namespace	line:5
+pickle	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_with_keras.py	/^import pickle$/;"	kind:namespace	line:5
+pickle	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_with_scikit.py	/^import pickle$/;"	kind:namespace	line:5
+readme	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/setup.py	/^    readme = readme_file.read()$/;"	kind:variable	line:7
+reduce	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_generator.py	/^from functools import reduce$/;"	kind:namespace	line:7
+reduce	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_generator.py	/^from functools import reduce$/;"	kind:namespace	line:7
+requirements	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/setup.py	/^requirements = [$/;"	kind:variable	line:9
+save	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_with_keras.py	/^def save(model, model_file):$/;"	kind:function	line:90
+save	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_with_scikit.py	/^def save(clf, clf_file):$/;"	kind:function	line:64
+save	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_with_keras.py	/^def save(model, model_file):$/;"	kind:function	line:90
+save	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_with_scikit.py	/^def save(clf, clf_file):$/;"	kind:function	line:64
+score	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_generator.py	/^        score = train_with_keras.test(clf, args.batch_size,$/;"	kind:variable	line:131
+score	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_generator.py	/^        score = train_with_keras.test(model, args.batch_size,$/;"	kind:variable	line:111
+score	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_generator.py	/^        score = train_with_keras.test(clf, args.batch_size,$/;"	kind:variable	line:131
+score	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_generator.py	/^        score = train_with_keras.test(model, args.batch_size,$/;"	kind:variable	line:111
+setup	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/setup.py	/^from setuptools import setup, find_packages$/;"	kind:namespace	line:4
+setup.py	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/setup.py	1;"	kind:file	line:1
+shuffled_index	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/split_shuffled_training.py	/^            shuffled_index = pickle.load(f)$/;"	kind:variable	line:139
+shuffled_index	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/split_shuffled_training.py	/^            shuffled_index = pickle.load(f)$/;"	kind:variable	line:139
+shuffled_index_file	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/split_shuffled_training.py	/^    shuffled_index_file = ($/;"	kind:variable	line:128
+shuffled_index_file	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/split_shuffled_training.py	/^    shuffled_index_file = ($/;"	kind:variable	line:128
+split	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/train_cadd.py	/^def split(full_set):$/;"	kind:function	line:30
+split_shuffled_training.py	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/split_shuffled_training.py	1;"	kind:file	line:1
+split_shuffled_training.py	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/split_shuffled_training.py	1;"	kind:file	line:1
+splits	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_generator.py	/^        args.splits else [80, 10, 10]$/;"	kind:variable	line:80
+splits	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_generator.py	/^        args.splits else [80, 10, 10]$/;"	kind:variable	line:80
+start	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/split_shuffled_training.py	/^    start = time.time()$/;"	kind:variable	line:112
+start	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_generator.py	/^    start = time.time()$/;"	kind:variable	line:13
+start	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/split_shuffled_training.py	/^    start = time.time()$/;"	kind:variable	line:112
+start	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_generator.py	/^    start = time.time()$/;"	kind:variable	line:13
+steps_testing	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_generator.py	/^        args.steps_testing else args.num_examples \/\/ splits[1]$/;"	kind:variable	line:86
+steps_testing	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_generator.py	/^        args.steps_testing else args.num_examples \/\/ splits[1]$/;"	kind:variable	line:86
+steps_training	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_generator.py	/^        args.steps_training else args.num_examples \/\/ splits[0]$/;"	kind:variable	line:83
+steps_training	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_generator.py	/^        args.steps_training else args.num_examples \/\/ splits[0]$/;"	kind:variable	line:83
+steps_validation	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_generator.py	/^        args.steps_validation else max($/;"	kind:variable	line:89
+steps_validation	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_generator.py	/^        args.steps_validation else max($/;"	kind:variable	line:89
+subprocess	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/__main__.py	/^    import subprocess$/;"	kind:namespace	line:8
+sys	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/utils.py	/^import sys$/;"	kind:namespace	line:2
+test	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/train_cadd.py	/^def test(X_test, y_test, model):$/;"	kind:function	line:59
+test	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_with_keras.py	/^def test(model, arg_batch_size, testing_batches_folder, steps_testing):$/;"	kind:function	line:83
+test	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_with_scikit.py	/^def test(clf, arg_batch_size, testing_batches_folder, steps_testing):$/;"	kind:function	line:55
+test	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_with_keras.py	/^def test(model, arg_batch_size, testing_batches_folder, steps_testing):$/;"	kind:function	line:83
+test	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_with_scikit.py	/^def test(clf, arg_batch_size, testing_batches_folder, steps_testing):$/;"	kind:function	line:55
+test_lmdb.py	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/tests/test_lmdb.py	1;"	kind:file	line:1
+test_lmdb_get_put	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/tests/test_lmdb.py	/^def test_lmdb_get_put():$/;"	kind:function	line:10
+test_pyarrow_serialization	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/tests/test_lmdb.py	/^def test_pyarrow_serialization():$/;"	kind:function	line:38
+test_requirements	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/setup.py	/^test_requirements = [$/;"	kind:variable	line:26
+test_suite	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/setup.py	/^    test_suite='tests',$/;"	kind:variable	line:58
+testing_batches_folder	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_generator.py	/^    testing_batches_folder = ($/;"	kind:variable	line:72
+testing_batches_folder	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_generator.py	/^    testing_batches_folder = ($/;"	kind:variable	line:72
+tests_require	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/setup.py	/^    tests_require=test_requirements$/;"	kind:variable	line:60
+tf	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/config.py	/^    import tensorflow as tf$/;"	kind:namespace	line:18
+time	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/split_shuffled_training.py	/^import time$/;"	kind:namespace	line:4
+time	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_generator.py	/^import time$/;"	kind:namespace	line:6
+time	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/split_shuffled_training.py	/^import time$/;"	kind:namespace	line:4
+time	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_generator.py	/^import time$/;"	kind:namespace	line:6
+tqdm	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/dataloaders.py	/^from tqdm import tqdm$/;"	kind:namespace	line:3
+tqdm	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/split_shuffled_training.py	/^from tqdm import tqdm$/;"	kind:namespace	line:8
+tqdm	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/split_shuffled_training.py	/^from tqdm import tqdm$/;"	kind:namespace	line:8
+train	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/train_cadd.py	/^def train(X_train, y_train, out_model):$/;"	kind:function	line:41
+train	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_with_keras.py	/^def train(arg_loss, arg_metrics, arg_batch_size, arg_num_epochs,$/;"	kind:function	line:37
+train	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_with_scikit.py	/^def train(arg_batch_size, arg_num_epochs, training_batches_folder,$/;"	kind:function	line:38
+train	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_with_keras.py	/^def train(arg_loss, arg_metrics, arg_batch_size, arg_num_epochs,$/;"	kind:function	line:37
+train	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_with_scikit.py	/^def train(arg_batch_size, arg_num_epochs, training_batches_folder,$/;"	kind:function	line:38
+train.py	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/cli/train.py	1;"	kind:file	line:1
+train_cadd.py	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/train_cadd.py	1;"	kind:file	line:1
+train_generator.py	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_generator.py	1;"	kind:file	line:1
+train_generator.py	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_generator.py	1;"	kind:file	line:1
+train_keras	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/__main__.py	/^from kipoi_cadd.cli.train import train_keras$/;"	kind:namespace	line:2
+train_keras	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/cli/train.py	/^def train_keras(my_arg=10):$/;"	kind:function	line:3
+train_test_split	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/train_cadd.py	/^from dask_ml.model_selection import train_test_split$/;"	kind:namespace	line:3
+train_with_keras	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_generator.py	/^import train_with_keras$/;"	kind:namespace	line:8
+train_with_keras	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_with_keras.py	/^import train_with_keras$/;"	kind:namespace	line:8
+train_with_keras	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_with_scikit.py	/^import train_with_keras$/;"	kind:namespace	line:9
+train_with_keras	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_generator.py	/^import train_with_keras$/;"	kind:namespace	line:8
+train_with_keras	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_with_keras.py	/^import train_with_keras$/;"	kind:namespace	line:8
+train_with_keras	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_with_scikit.py	/^import train_with_keras$/;"	kind:namespace	line:9
+train_with_keras.py	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_with_keras.py	1;"	kind:file	line:1
+train_with_keras.py	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_with_keras.py	1;"	kind:file	line:1
+train_with_scikit	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_generator.py	/^import train_with_scikit$/;"	kind:namespace	line:9
+train_with_scikit	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_generator.py	/^import train_with_scikit$/;"	kind:namespace	line:9
+train_with_scikit.py	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_with_scikit.py	1;"	kind:file	line:1
+train_with_scikit.py	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_with_scikit.py	1;"	kind:file	line:1
+training	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/split_shuffled_training.py	/^    training = ("\/s\/project\/kipoi-cadd\/data\/raw\/v1.3\/training_data\/" +$/;"	kind:variable	line:134
+training	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_generator.py	/^    training = ("\/s\/project\/kipoi-cadd\/data\/raw\/v1.3\/training_data\/" +$/;"	kind:variable	line:67
+training	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/split_shuffled_training.py	/^    training = ("\/s\/project\/kipoi-cadd\/data\/raw\/v1.3\/training_data\/" +$/;"	kind:variable	line:134
+training	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_generator.py	/^    training = ("\/s\/project\/kipoi-cadd\/data\/raw\/v1.3\/training_data\/" +$/;"	kind:variable	line:67
+training_batches_folder	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_generator.py	/^    training_batches_folder = ($/;"	kind:variable	line:69
+training_batches_folder	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_generator.py	/^    training_batches_folder = ($/;"	kind:variable	line:69
+training_imputed	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/split_shuffled_training.py	/^    training_imputed = ("\/s\/project\/kipoi-cadd\/data\/raw\/v1.3\/training_data\/" +$/;"	kind:variable	line:124
+training_imputed	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_generator.py	/^    training_imputed = ("\/s\/project\/kipoi-cadd\/data\/raw\/v1.3\/training_data\/" +$/;"	kind:variable	line:65
+training_imputed	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/split_shuffled_training.py	/^    training_imputed = ("\/s\/project\/kipoi-cadd\/data\/raw\/v1.3\/training_data\/" +$/;"	kind:variable	line:124
+training_imputed	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_generator.py	/^    training_imputed = ("\/s\/project\/kipoi-cadd\/data\/raw\/v1.3\/training_data\/" +$/;"	kind:variable	line:65
+trange	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_with_scikit.py	/^from tqdm import trange$/;"	kind:namespace	line:8
+trange	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_with_scikit.py	/^from tqdm import trange$/;"	kind:namespace	line:8
+url	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/setup.py	/^    url='...',$/;"	kind:variable	line:39
+utils.py	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/utils.py	1;"	kind:file	line:1
+validation_batches_folder	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/pipelines/train_generator.py	/^    validation_batches_folder = ($/;"	kind:variable	line:75
+validation_batches_folder	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/src/retrain-cadd/train_generator.py	/^    validation_batches_folder = ($/;"	kind:variable	line:75
+version	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/setup.py	/^    version='0.0.1',$/;"	kind:variable	line:35
+wc_l	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/__main__.py	/^def wc_l(fname):$/;"	kind:function	line:4
+write_json	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/kipoi_cadd/utils.py	/^def write_json(obj, fname, **kwargs):$/;"	kind:function	line:20
+zip_safe	../../../../data/ouga04b/ag_gagneur/project_local/kipoi-cadd/setup.py	/^    zip_safe=False,$/;"	kind:variable	line:55

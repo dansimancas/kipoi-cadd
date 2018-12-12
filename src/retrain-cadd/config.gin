@@ -1,0 +1,45 @@
+# you can import any other python modules
+# NOTE: if your code is not importable in python directly
+# you either have to `cd` into the directory containing the modules
+# or you need to add the folder with the python files to PYTHONPATH:
+# `export PYTHONPATH=$PYTHONPATH:~/my_directory/`
+import kipoi_cadd
+
+# ==================================================================
+# model.gin
+# --------------------------------------------
+# model
+train.trainer_cls = @KerasTrainer
+train.model = @logistic_regression_keras()
+logistic_regression_keras.n_features = 1063
+logistic_regression_keras.l2_regularization = 1.0
+logistic_regression_keras.learning_rate = 0.015
+
+# --------------------------------------------
+# training
+train.batch_size = 64
+train.num_workers = 5
+
+# train-specific
+train.epochs = 100
+train.early_stop_patience = 4
+train.train_epoch_frac = 1.0  # optionally subset the training set
+train.valid_epoch_frac = 1.0  # optionally subset the validation set
+
+# ==================================================================
+# CaddDataset
+# CaddDataset.cycle = False
+
+# ==================================================================
+# problem.gin
+# --------------------------------------------
+# data
+train.data = @cadd_train_valid_data()
+cadd_train_valid_data.lmdb_dir = "/s/project/kipoi-cadd/data/raw/v1.3/training_data/lmdb/"
+cadd_train_valid_data.train_id_file = "/s/project/kipoi-cadd/data/raw/v1.3/training_data/train_idx.pkl"
+cadd_train_valid_data.valid_id_file = "/s/project/kipoi-cadd/data/raw/v1.3/training_data/valid_idx.pkl"
+
+
+# --------------------------------------------
+# evaluation
+train.eval_metric = @ClassificationMetrics()

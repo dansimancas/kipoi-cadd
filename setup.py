@@ -7,18 +7,22 @@ with open('README.md') as readme_file:
     readme = readme_file.read()
 
 requirements = [
-    "cyvcf2",
-    "concise",
-    "pyvcf",
-    "dask",
-    "joblib",
-    "deepdish",
-    "dask",
-    "toolz",
     "cloudpickle",
+    "gin-train",
+    "concise",
+    "dask",
+    "deepdish",
+    "gin-config",
+    "joblib",
     "kipoi",
-    "scikit-learn",
+    "lmdb",
     "openpyxl",
+    "pyarrow",
+    "pytest",
+    "pyvcf",
+    "scikit-learn",
+    "tensorflow==1.9",
+    "toolz",
 ]
 
 test_requirements = [

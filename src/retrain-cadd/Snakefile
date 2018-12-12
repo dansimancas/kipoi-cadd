@@ -1,0 +1,17 @@
+
+
+rule python:
+    input: bla
+    output: bla
+    run:
+        from kipoi_cadd.cli.train import keras_train
+        keras_train(input, output)
+
+rule shell:
+    input: bla
+    output: bla
+    shell:
+        """
+        kipoi_cadd keras-train --input={input} --output={output}
+        """
+
