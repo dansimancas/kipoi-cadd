@@ -16,9 +16,8 @@ def logistic_regression_keras(n_features, l2_regularization=1.0, learning_rate=0
     model.compile(Adam(lr=learning_rate), "binary_crossentropy", ['acc'])
     return model
 
-def logistic_regression_scikit(loss='log', penalty='l2', alpha=1.0,
-                               learning_rate='optimal'):
-    clf = SGDClassifier(loss=loss, penalty=penalty, alpha=alpha,
+def logistic_regression_scikit(alpha=1.0, learning_rate='optimal', n_jobs=1):
+    clf = SGDClassifier(loss='log', penalty='l2', alpha=alpha,
         learning_rate=learning_rate)
     return clf
 
