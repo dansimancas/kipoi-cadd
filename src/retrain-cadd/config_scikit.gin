@@ -9,7 +9,7 @@ import kipoi_cadd
 # model.gin
 # --------------------------------------------
 # model
-train.trainer_cls = @ScikitTrainer
+train.trainer_cls = @SklearnTrainer
 train.model = @logistic_regression_scikit()
 logistic_regression_scikit.alpha = 1.0
 logistic_regression_scikit.learning_rate = 'optimal'
