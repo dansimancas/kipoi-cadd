@@ -1,6 +1,6 @@
+from gin_train.utils import write_json
 import os
 import numpy as np
-from gin_train.utils import write_json
 from tqdm import tqdm
 from kipoi.data_utils import numpy_collate_concat
 from kipoi.external.flatten_json import flatten
@@ -52,20 +52,25 @@ class SklearnTrainer:
         """
         from sklearn.externals import joblib
 
-
+        print("Started loading training dataset")
+        
         X_train, y_train = self.train_dataset.load_all(batch_size=batch_size,
-                                               shuffle=True,
                                                num_workers=num_workers)
+        """
+        it = self.train_dataset.batch_train_iter(batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
+        X_train, y_train = next(it)
+        """
 
+        print("Finished loading training dataset")
         # train the model
         if len(self.valid_dataset) == 0:
             raise ValueError("len(self.valid_dataset) == 0")
 
         self.model.fit(X_train,
                        y_train,
-                       coef_init=None,
-                       intercept_init=None,
-                       sample_weight=None)
+                       coef_init=coef_init,
+                       intercept_init=intercept_init,
+                       sample_weight=sample_weight)
 
         joblib.dump(self.model, self.ckp_file)
 
@@ -74,18 +79,22 @@ class SklearnTrainer:
     #         """
     #         self.model = load_model(self.ckp_file)
 
-    def evaluate(self, metric, batch_size=256, num_workers=8, save=True):
+    def evaluate(self, batch_size=256, shuffle=True, num_workers=8, save=True):
         """Evaluate the model on the validation set
         Args:
           metrics: a list or a dictionary of metrics
           batch_size:
           num_workers:
         """
-
+        print("Started loading validation dataset")
+        
         X_valid, y_valid = self.valid_dataset.load_all(batch_size=batch_size,
-                                               shuffle=True,
                                                num_workers=num_workers)
-
+        """
+        it = self.valid_dataset.batch_train_iter(batch_size=batch_size, shuffle=shuffle, num_workers=num_workers)
+        X_valid, y_valid = next(it)
+        """
+        print("Finished loading validation dataset")
         metric_res = self.model.score(X_valid, y_valid)
 
         if save:

@@ -9,27 +9,23 @@ import kipoi_cadd
 # model.gin
 # --------------------------------------------
 # model
-train.trainer_cls = @SklearnTrainer
-train.model = @logistic_regression_scikit()
+train_sklearn.trainer_cls = @SklearnTrainer
+train_sklearn.model = @logistic_regression_scikit()
 logistic_regression_scikit.alpha = 1.0
-logistic_regression_scikit.learning_rate = 'optimal'
+logistic_regression_scikit.learning_rate = "optimal"
 logistic_regression_scikit.n_jobs = 10
+logistic_regression_scikit.n_iter = 100
 
 # --------------------------------------------
 # training
-train.batch_size = 64
-train.num_workers = 5
-train.shuffle = True
+train_sklearn.batch_size = 512
+train_sklearn.num_workers = 10
 
 # ==================================================================
 # problem.gin
 # --------------------------------------------
 # data
-train.data = @cadd_train_valid_data()
+train_sklearn.data = @cadd_train_valid_data()
 cadd_train_valid_data.lmdb_dir = "/s/project/kipoi-cadd/data/raw/v1.3/training_data/lmdb/"
 cadd_train_valid_data.train_id_file = "/s/project/kipoi-cadd/data/raw/v1.3/training_data/train_idx.pkl"
 cadd_train_valid_data.valid_id_file = "/s/project/kipoi-cadd/data/raw/v1.3/training_data/valid_idx.pkl"
-
-
-# --------------------------------------------
-# evaluation

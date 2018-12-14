@@ -138,7 +138,7 @@ class CaddBatchDataset(BatchDataset):
         return batch
 
 
-# @gin.configurable
+@gin.configurable
 class CaddDataset(Dataset):
     def __init__(self, lmbd_dir,
                  variant_id_file, version="1.3",
@@ -207,7 +207,7 @@ def train_test_split_indexes(variant_id_file, test_size, random_state=1):
     return train_vars, test_vars
 
 
-# @gin.configurable
+@gin.configurable
 def cadd_train_valid_data(lmdb_dir, train_id_file, valid_id_file):
     return CaddDataset(lmdb_dir, train_id_file), CaddDataset(lmdb_dir, valid_id_file)
 
