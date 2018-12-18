@@ -11,7 +11,7 @@ import pandas as pd
 import sys
 from kipoi_cadd.utils import load_pickle
 import logging
-from tqdm import tqdm
+from tqdm import tqdm, trange
 import time
 import numpy as np
 import blosc
@@ -146,20 +146,20 @@ class CaddDataset(Dataset):
 
         self.version = version
 
+        self.lmdb_cadd_path = lmbd_dir
+        self.lmdb_cadd = None
+        self.txn = None
+        
         # indexed by location
         self.variant_ids_file = variant_id_file
         self.variant_ids = load_pickle(self.variant_ids_file)
         self.variant_ids = self.variant_ids.values
-        
-        self.lmdb_cadd_path = lmbd_dir
-        self.lmdb_cadd = None
-        self.txn = None
 
     def __len__(self):
         return len(self.variant_ids)
 
     def __del__(self):
-        if self.lmdb_cadd is not None:
+        if self.lmdb_cadd:
             self.lmdb_cadd.close()
 
     def __getitem__(self, idx):
@@ -176,27 +176,25 @@ class CaddDataset(Dataset):
         buf = bytes(self.txn.get(variant_id.encode('ascii')))
 
         #print("Deserializing", idx)
-        item = pa.deserialize(buf)
+        
         item['targets'] = 0 if item['targets'] == -1 else item['targets']
         # TODO - check that this is not too harmful
-        item['inputs'] = np.minimum(item['inputs'],  65536)  # 2**16
+        if np.max(item['inputs']) > 65500 or np.inf(item['inputs']).any():
+            item['inputs'] = 65500  # np.finfo(np.float16).max
 
         return item
 
 
-    def load_all(self, batch_size=64, num_workers=10):
+    def load_all(self):
         D = len(self.__getitem__(0)['inputs'])
         N = self.__len__()
         X = np.zeros((N, D), dtype=np.float16)
         y = np.zeros(N, dtype=np.float16)
-        it = self.batch_iter(batch_size=batch_size, shuffle=True, num_workers=num_workers)
-
-        i = 0
-        for sample in tqdm(it):
-            bs = sample['inputs'].shape[0]
-            X[i:i+bs,:] = sample['inputs']
-            y[i:i+bs] = sample['targets']
-
+        
+        for idx in trange(N):
+            item = self.__getitem__(idx)
+            X[idx,:] = item['inputs']
+            y[idx] = item['targets']
         return X, y
 
 
