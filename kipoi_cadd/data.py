@@ -170,32 +170,32 @@ class CaddDataset(Dataset):
         # TODO: Make this distiction clearer, do we want to search by loc or iloc?
         # Loc breaks when a splitted dataset doesn't have idx.
         # variant_id = self.variant_ids.loc[idx]
-        #print("Getting variant ids", idx)
+        # print("Getting variant ids", idx)
         variant_id = self.variant_ids[idx]
-        #print("Getting the bytes for ", idx)
+        # print("Getting the bytes for ", idx)
         buf = bytes(self.txn.get(variant_id.encode('ascii')))
 
-        #print("Deserializing", idx)
-        
+        # print("Deserializing", idx)
+        item = pa.deserialize(buf)
         item['targets'] = 0 if item['targets'] == -1 else item['targets']
         # TODO - check that this is not too harmful
-        if np.max(item['inputs']) > 65500 or np.inf(item['inputs']).any():
-            item['inputs'] = 65500  # np.finfo(np.float16).max
+        if np.isinf(item['inputs']).any():
+            col = np.argmax(item['inputs'])
+            # print("Inf number found!! idx:", idx, "var_id:", item['metadata']['variant_id'], "col:", col)
+            item['inputs'] = np.minimum(item['inputs'],  65500)
 
         return item
 
 
-    def load_all(self):
-        D = len(self.__getitem__(0)['inputs'])
-        N = self.__len__()
-        X = np.zeros((N, D), dtype=np.float16)
-        y = np.zeros(N, dtype=np.float16)
-        
-        for idx in trange(N):
-            item = self.__getitem__(idx)
-            X[idx,:] = item['inputs']
-            y[idx] = item['targets']
-        return X, y
+    def load_all(self, batch_size=64, num_workers=64, shuffle=True, drop_last=False):
+        it = self.batch_iter(batch_size=batch_size, num_workers=num_workers, shuffle=shuffle, drop_last=drop_last)
+        dataset = numpy_collate_concat([x for x in tqdm(it)])
+        return dataset['inputs'], dataset['targets']
+    
+    
+    def load_all_with_metadata(self, batch_size=64, num_workers=64, shuffle=True, drop_last=False):
+        it = self.batch_iter(batch_size=batch_size, num_workers=num_workers, shuffle=shuffle, drop_last=drop_last)
+        return numpy_collate_concat([x for x in tqdm(it)])
 
 
 def train_test_split_indexes(variant_id_file, test_size, random_state=1):
@@ -209,6 +209,18 @@ def train_test_split_indexes(variant_id_file, test_size, random_state=1):
 def cadd_train_valid_data(lmdb_dir, train_id_file, valid_id_file):
     return CaddDataset(lmdb_dir, train_id_file), CaddDataset(lmdb_dir, valid_id_file)
 
+
+@gin.configurable
+def sparse_cadd_dataset(sparse_matrix_file, split=0.3, random_state=42):
+    from scipy.sparse import load_npz
+    sparse_matrix = load_npz(sparse_matrix_file)
+    y = sparse_matrix[:,0]
+    X = sparse_matrix[:,1:]
+    print("Retrieved y", y.shape, "and X", X.shape)
+    del sparse_matrix
+
+    X_train, X_valid, y_train, y_valid = train_test_split(X, y, test_size=split, random_state=random_state)
+    return (X_train, y_train), (X_valid, y_valid)
 
 def cadd_serialize_string_row(row, variant_id, separator, dtype=np.float16, target_col=0):
     row = np.array(row.split(separator), dtype=dtype)

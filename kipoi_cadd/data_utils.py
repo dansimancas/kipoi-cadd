@@ -1,4 +1,3 @@
-import dask.dataframe as dd
 from kipoi.data import BaseDataLoader, BatchDataset
 from kipoi_cadd.config import get_data_dir, get_package_dir
 from sklearn.model_selection import train_test_split
@@ -133,6 +132,25 @@ def create_lmdb_from_iterator(
     logger.info("Total elapsed time: {:.2f} minutes.".format(
         (end - start) / 60))
 
+    
+def load_csv_to_sparse_matrix(csv_file, blocksize=10E6, final_type=np.float32):
+    import dask.dataframe as ddf
+    from scipy.sparse import csr_matrix
+    from dask.diagnostics import ProgressBar
+    
+    print("Started dask task.")
+    df_dask = ddf.read_csv(csv_file, blocksize=blocksize, assume_missing=True)
+    df_dask = df_dask.map_partitions(lambda part: part.to_sparse(fill_value=0))
+    
+    with ProgressBar():
+        df_dask = df_dask.compute().reset_index(drop=True)
+    
+    print("Finished dask task.")
+    csr = csr_matrix(df_dask, dtype=final_type, copy=True)
+    print("Finished transforming to csr_matrix.")
+    del df_dask
+
+    return csr
 
 def get_one_batch(idx):
     ddir = "/s/project/kipoi-cadd/data"
