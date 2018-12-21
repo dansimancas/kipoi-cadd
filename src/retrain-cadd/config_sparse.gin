@@ -15,7 +15,7 @@ train_sklearn_logistic_regression.model = @logistic_regression_scikit()
 logistic_regression_scikit.C = 0.25
 logistic_regression_scikit.solver = 'lbfgs'
 logistic_regression_scikit.tolerance = 0.0001
-logistic_regression_scikit.max_iter = 500
+logistic_regression_scikit.max_iter = 10
 logistic_regression_scikit.verbose = 1
 logistic_regression_scikit.n_jobs = 64
 
@@ -28,6 +28,6 @@ logistic_regression_scikit.n_jobs = 64
 # --------------------------------------------
 # data
 train_sklearn_logistic_regression.data = @sparse_cadd_dataset()
-sparse_cadd_dataset.sparse_matrix_file = "/s/project/kipoi-cadd/data/raw/v1.3/training_data/shuffled_10k_sparse.npz"
+sparse_cadd_dataset.sparse_matrix_file = "/s/project/kipoi-cadd/data/raw/v1.3/training_data/sparse_all.npz"
 sparse_cadd_dataset.split = 0.3
 sparse_cadd_dataset.random_state = 42

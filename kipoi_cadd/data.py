@@ -104,8 +104,7 @@ class Dataset(BaseDataLoader):
 
 class CaddBatchDataset(BatchDataset):
     def __init__(self, lmbd_dir,
-                 batch_idx_file, version="1.3",
-                 separator=','):
+                 batch_idx_file, version="1.3"):
 
         self.version = version
 
@@ -141,8 +140,7 @@ class CaddBatchDataset(BatchDataset):
 @gin.configurable
 class CaddDataset(Dataset):
     def __init__(self, lmbd_dir,
-                 variant_id_file, version="1.3",
-                 separator=','):
+                 variant_id_file, version="1.3"):
 
         self.version = version
 

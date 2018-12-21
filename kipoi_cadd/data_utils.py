@@ -148,16 +148,85 @@ def load_csv_to_sparse_matrix(csv_file, blocksize=10E6, final_type=np.float32):
     print("Finished dask task.")
     csr = csr_matrix(df_dask, dtype=final_type, copy=True)
     print("Finished transforming to csr_matrix.")
+    print("Changing -1 in the targets")
+    y_train.data[y_train.data == -1] = 0
+    y_valid.data[y_valid.data == -1] = 0
     del df_dask
 
     return csr
 
-def get_one_batch(idx):
-    ddir = "/s/project/kipoi-cadd/data"
-    lmdbpath = ddir + "/raw/v1.3/training_data/lmdb_batched"
-    env = lmdb.Environment(lmdbpath, readonly=True, lock=False)
+
+def put_batches(csv_file, lmdb_batched_dir, batch_size=256, separator=','):
+    with open(variant_ids, 'rb') as f:
+        varids = pickle.load(f)
+
+    row_example = pd.read_csv(csv_file,
+                              sep=separator,
+                              nrows=1,
+                              skiprows=1,
+                              header=None)
+
+    map_size = cadd_serialize_numpy_row(
+        row_example.values[0], varids[0],
+        np.float16, 0).to_buffer().size
+
+    multipl = 1.9
+    map_size = int(map_size * varids.shape[0] * multipl)
+    
+    env = lmdb.Environment(lmdbpath, map_size=map_size, max_dbs=0, lock=False)
+
+    with env.begin(write=True, buffers=True) as txn: 
+        for i in range(X.shape[0]):
+            data = {"inputs": X.iloc[i, 1:],
+                    "targets": X.iloc[i, 0],
+                    "metadata": {"variant_id": "bla",
+                                "row_idx": str(X.index[i])}}
+
+            buf = pa.serialize(data).to_buffer()
+            # db.put(key, value)
+            # print(data['metadata']['row_idx'])
+            txn.put(data['metadata']['row_idx'].encode('ascii'), buf)
+
+    with env.begin(write=False, buffers=True) as txn:
+        buf = txn.get(str(check_index).encode('ascii'))  # only valid until the next write.
+        buf_copy = bytes(buf)       # valid forever
+
+    variant = pa.deserialize(buf_copy)
+    s = X.loc[check_index]
+
+    # if os.path.exists(lmdbpath):
+    #    shutil.rmtree(lmdbpath, ignore_errors=True)
+    #    os.rmdir(lmdbpath)
+
+    assert variant['inputs'].equals(s[1:])
+
+    
+def get_one_batch(lmdb_batch_dir, idx):
+    env = lmdb.Environment(lmdb_batch_dir, readonly=True, lock=False)
     with env.begin() as txn:
         buff = bytes(txn.get(str(idx).encode('ascii')))
         ser = blosc.decompress(buff)
         batch = pa.deserialize(ser)
-    print("the batch is:", batch)
+    return batch
+
+
+def dir_batch_generator(directory, batch_size, sep=','):
+    import os
+
+    sub_batch = None
+    for file in os.listdir(directory):
+        filename = directory + str(os.fsdecode(file))
+        rows_df = pd.read_csv(filename, sep=sep, index_col=0)
+        rows_df.y = [0 if r == -1 else r for r in rows_df.y]
+        sub = (rows_df.shape[0] // batch_size) + 1
+        for i in range(sub):
+            start = (i) * batch_size
+            if sub_batch is None:
+                end = min(rows_df.shape[0], start + batch_size)
+                sub_batch = rows_df.iloc[start:end, :]
+            else:
+                end = batch_size - sub_batch.shape[0]
+                sub_batch = sub_batch.append(rows_df.iloc[start:end, :])
+            if sub_batch.shape[0] == batch_size:
+                yield (sub_batch.iloc[:, 1:], sub_batch.iloc[:, 0])
+                sub_batch = None
