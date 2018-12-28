@@ -6,7 +6,7 @@ import lmdb
 import pickle
 import pandas as pd
 import sys
-from kipoi_cadd.utils import load_pickle, OrderedSet
+from kipoi_cadd.utils import load_pickle, OrderedSet, get_all_files_extension
 import logging
 from tqdm import tqdm
 from kipoi_cadd.data import cadd_serialize_numpy_row, cadd_serialize_string_row
@@ -84,6 +84,53 @@ def create_lmdb(
         (end - start) / 60))
 
 
+def create_batched_lmdb_from_iterator(it, lmdb_batch_dir, variant_ids_file, num_batches=-1,
+                              map_size=23399354270):
+    start = time.time()
+
+    index_mapping = OrderedDict()
+    map_size = None
+    txn = None
+    batch_num = 0
+    variant_ids = load_pickle(variant_ids_file)
+
+    env = lmdb.Environment(lmdb_batch_dir, map_size=map_size, max_dbs=0, lock=False)
+    with env.begin(write=True, buffers=True) as txn:
+        for batch in tqdm(it):
+            b = {
+                "batch_id": np.int32(batch_num),
+                "inputs": batch[0].values.astype(np.float16),
+                "targets": batch[1].values.astype(np.float16),
+                "metadata": {
+                    "row_num": np.array(batch[0].index, dtype=np.int32),
+                    "variant_id": np.array(variant_ids.loc[batch[0].index], dtype='<U20')
+                }
+            }
+
+            # Serialize and compress
+            buff = pa.serialize(b).to_buffer()
+            blzpacked = blosc.compress(buff, typesize=8, cname='blosclz')
+
+            try:
+                txn.put(str(batch_num).encode('ascii'), blzpacked)
+            except lmdb.MapFullError as err:
+                print(str(err) + ". Exiting the program.")
+
+            batch_num += 1
+            # if batch_num >= num_batches: break
+
+    print("Finished putting " + str(batch_num) + " batches to lmdb.")
+    end = time.time()
+    print("Total elapsed time: {:.2f} minutes.".format(
+        (end - start) / 60))
+
+
+def calculate_map_size(row_example, nrows, multiplier=1.9):
+    row_size = pa.serialize(row_example).to_buffer().size
+    map_size = int(row_size * nrows * multiplier)
+    return map_size
+    
+
 def create_lmdb_from_iterator(
     it,
     output_lmdb_file=get_data_dir() + "/raw/v1.3/training_data/lmdb_batched",
@@ -148,11 +195,15 @@ def load_csv_to_sparse_matrix(csv_file, blocksize=10E6, final_type=np.float32):
     print("Finished dask task.")
     csr = csr_matrix(df_dask, dtype=final_type, copy=True)
     print("Finished transforming to csr_matrix.")
-    print("Changing -1 in the targets")
-    y_train.data[y_train.data == -1] = 0
-    y_valid.data[y_valid.data == -1] = 0
+    
     del df_dask
-
+    
+    print("Changing -1 in the targets")
+    y_array = csr[:, 0].toarray()
+    y_array[y_array==-1] = 0
+    new_y = csr_matrix(y_array)
+    csr[:, 0] = new_y
+    
     return csr
 
 
@@ -211,11 +262,13 @@ def get_one_batch(lmdb_batch_dir, idx):
 
 
 def dir_batch_generator(directory, batch_size, sep=','):
-    import os
+    import os, glob
 
     sub_batch = None
-    for file in os.listdir(directory):
-        filename = directory + str(os.fsdecode(file))
+    
+    # for file in os.listdir(directory):
+    for file in get_all_files_extension(directory, ".csv"):
+        filename = str(os.fsdecode(file))
         rows_df = pd.read_csv(filename, sep=sep, index_col=0)
         rows_df.y = [0 if r == -1 else r for r in rows_df.y]
         sub = (rows_df.shape[0] // batch_size) + 1
@@ -230,3 +283,24 @@ def dir_batch_generator(directory, batch_size, sep=','):
             if sub_batch.shape[0] == batch_size:
                 yield (sub_batch.iloc[:, 1:], sub_batch.iloc[:, 0])
                 sub_batch = None
+                
+
+def cadd_generate_batched_lmdb_from_many_csv(lmdb_batch_dir, csv_folder, variant_ids_file, batch_size, num_batches=-1):
+    it = dir_batch_generator(csv_folder, batch_size)
+    test_batch = next(it)
+    variant_ids = load_pickle(variant_ids_file)
+    nrows = len(variant_ids)
+    
+    row_example = {
+    "batch_id": np.int32(0),
+    "inputs": test_batch[0].values.astype(np.float16),
+    "targets": test_batch[1].values.astype(np.float16),
+    "metadata": {
+        "row_num": np.array(test_batch[0].index, dtype=np.int32),
+        "variant_id": np.array(variant_ids.loc[test_batch[0].index], dtype='<U20')
+        }
+    }
+    
+    ms = calculate_map_size(row_example, nrows)
+    it = dir_batch_generator(csv_folder, batch_size)
+    create_batched_lmdb_from_iterator(it, lmdb_batch_dir, variant_ids_file, num_batches=num_batches, map_size=ms)

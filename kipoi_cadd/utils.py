@@ -82,6 +82,17 @@ def generate_batch_idxs(shuffled_idxs_file,
         pickle.dump(batch_indexes, f)
 
 
+def get_all_files_extension(folder, extension):
+    import os
+    all_files = []
+    for root, _, filenames in os.walk(folder):
+        for filename in filenames: 
+            all_files.append(os.path.join(root,filename))
+
+    all_wanted = [f for f in all_files if f.endswith(extension)]
+    return all_wanted
+
+
 if __name__ == '__main__':
     inputfile = get_data_dir() + "/raw/v1.3/training_data/training_data.tsv"
     shuffled_idxs_file = get_data_dir() + "/raw/v1.3/training_data/shuffle_splits/shuffled_index.pickle"

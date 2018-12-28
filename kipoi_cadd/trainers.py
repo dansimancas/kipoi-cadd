@@ -74,7 +74,7 @@ class SklearnTrainer:
                        coef_init=coef_init,
                        intercept_init=intercept_init,
                        sample_weight=sample_weight)
-
+        
         joblib.dump(self.model, self.ckp_file)
 
     #     def load_best(self):
@@ -149,10 +149,9 @@ class SklearnLogisticRegressionTrainer:
         
         if isinstance(self.train_dataset[0], csr_matrix):
             X_train, y_train = self.train_dataset
-            y_train = y_train.toarray()
+            y_train = y_train.toarray().ravel()
         else:
             X_train, y_train = self.train_dataset.load_all()
-            # train the model
 
             if len(self.valid_dataset) == 0:
                 raise ValueError("len(self.valid_dataset) == 0")
@@ -182,6 +181,10 @@ class SklearnLogisticRegressionTrainer:
         self.model.fit(X_train,
                        y_train,
                        sample_weight=sample_weight)
+        
+        print("Calculating training accuracy:")
+        acc = self.model.score(X_train, y_train)
+        print("Obtained training accuracy: ", acc)
 
         joblib.dump(self.model, self.ckp_file)
 
@@ -190,7 +193,7 @@ class SklearnLogisticRegressionTrainer:
     #         """
     #         self.model = load_model(self.ckp_file)
 
-    def evaluate(self, sample_weight=None, use_sparse_matrices=False, scaler_path=None, eval_type=np.float32, save=True):
+    def evaluate(self, metric, use_sparse_matrices=False, scaler_path=None, eval_type=np.float32, save=True):
         """Evaluate the model on the validation set
         Args:
           metrics: a list or a dictionary of metrics
@@ -201,7 +204,7 @@ class SklearnLogisticRegressionTrainer:
         
         if isinstance(self.valid_dataset[0], csr_matrix):
             X_valid, y_valid = self.valid_dataset
-            y_valid = y_valid.toarray()
+            y_valid = y_valid.toarray().ravel()
         else:
             X_valid, y_valid = self.valid_dataset.load_all()
 
@@ -226,7 +229,9 @@ class SklearnLogisticRegressionTrainer:
                 print("Finished scaling X.")
 
         print("Finished loading validation dataset. Shape: ", X_valid.shape, "True values:", y_valid.sum()/y_valid.shape[0])
-        metric_res = self.model.score(X_valid, y_valid, sample_weight=sample_weight)
+        
+        y_pred = self.model.predict(X_valid)
+        metric_res = metric(y_valid, y_pred)
         print("metric_res", metric_res, np.amax(X_valid))
 
         if save:
