@@ -39,6 +39,19 @@ def dump_to_pickle(filename, obj):
         pickle.dump(obj, f)
 
 
+def variant_id_string(chrom, pos, ref, alt, use_chr_word=False):
+    if use_chr_word:
+        chrom = chrom if 'chr' in chrom else 'chr' + chrom
+    else:
+        chrom = chrom if 'chr' not in chrom else chrom.split('chr')[1]
+    
+    if isinstance(alt, list):
+        var_id_str = ':'.join([chrom, str(pos), ref, str(alt)])
+    else:
+        var_id_str = ':'.join([chrom, str(pos), ref, ("['" + alt + "']")])
+    return var_id_str
+
+
 def generate_variant_ids(inputfile, outputfile, separator='\t'):
     input_df = pd.read_csv(inputfile,
                            sep=separator,
@@ -91,6 +104,13 @@ def get_all_files_extension(folder, extension):
 
     all_wanted = [f for f in all_files if f.endswith(extension)]
     return all_wanted
+
+
+def get_dtypes_info(dtype):
+    if "float" in str(dtype):
+        return (np.finfo(dtype).min, np.finfo(dtype).max)
+    else:
+        return (np.iinfo(dtype).min, np.iinfo(dtype).max)
 
 
 if __name__ == '__main__':

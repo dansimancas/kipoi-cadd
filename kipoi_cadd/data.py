@@ -4,6 +4,7 @@ import dask.dataframe as dd
 from kipoi.data import BaseDataLoader, BatchDataset
 from kipoi_cadd.config import get_data_dir, get_package_dir
 from sklearn.model_selection import train_test_split
+from scipy.sparse import csr_matrix, save_npz, load_npz
 import pyarrow as pa
 import lmdb
 import pickle
@@ -20,6 +21,7 @@ import pyarrow as pa
 from time import sleep
 from random import randint
 from torch.utils.data import DataLoader
+from kipoi_cadd.utils import get_dtypes_info
 import abc
 from kipoi.data_utils import (numpy_collate, numpy_collate_concat, get_dataset_item,
                               DataloaderIterable, batch_gen, get_dataset_lens, iterable_cycle)
@@ -102,6 +104,25 @@ class Dataset(BaseDataLoader):
         return numpy_collate_concat([x for x in tqdm(self.batch_iter(batch_size, **kwargs))])
 
 
+class CaddSparseDataset(Dataset):
+    def __init__(self, sparse_npz_file, variant_ids_file, version="1.3"):
+        self.data = load_npz(sparse_npz_file)
+        self.variant_ids = load_pickle(variant_ids_file)
+        if isinstance(self.variant_ids, pd.Series):
+            self.variant_ids = self.variant_ids.values
+    
+    def __len__(self):
+        return len(self.variant_ids)
+    
+    def __getitem__(self, idx):
+        item = {'inputs': None, 'targets': None, 'variant_id': None} 
+        item['inputs'] = self.data[idx, 1:].toarray()
+        item['targets'] = self.data[idx, 0]
+        item['variant_id'] = self.variant_ids[idx]
+        
+        return item
+    
+    
 class CaddBatchDataset(BatchDataset):
     def __init__(self, lmbd_dir,
                  batch_idx_file, version="1.3"):
@@ -208,17 +229,58 @@ def cadd_train_valid_data(lmdb_dir, train_id_file, valid_id_file):
     return CaddDataset(lmdb_dir, train_id_file), CaddDataset(lmdb_dir, valid_id_file)
 
 
+def load_sparse_indexed_matrix(sparse_matrix, index_col=0, shuffle=False):
+    """Loads a sparse matrix and extracts the index.
+    Args:
+      sparse_matrix: path-like or csr_matrix instance.
+    """
+    if isinstance(sparse_matrix, str):
+        sparse_matrix = load_npz(sparse_matrix)
+    elif not isinstance(sparse_matrix, csr_matrix):
+        raise ValueError("Input must be either a path to a sparse matrix or an object of csr_matrix type.")
+    
+    if sparse_matrix.shape[0] > get_dtypes_info(np.int32)[1]:
+        raise NotImplementedError("Matrix shape " + str(sparse_matrix.shape) +
+                                   ". We support up to " + str(get_dtypes_info(np.int32)[1]) +
+                                  " indices.")
+    if shuffle:
+        idx = np.arange(np.shape(sparse_matrix)[0])
+        np.random.shuffle(idx)
+        sparse_matrix = sparse_matrix[idx, :]
+
+    variant_ids, keep_cols = np.array(range(sparse_matrix.shape[0]), dtype=np.int32), list(range(sparse_matrix.shape[1]))
+    
+    if index_col is not None:
+        variant_ids = sparse_matrix[:, index_col].toarray().ravel().astype(np.int32)
+        keep_cols.remove(index_col)
+        
+    sparse_matrix = sparse_matrix[:, keep_cols]
+    print("Retrieved a matrix with shape ", sparse_matrix.shape)
+    
+    return sparse_matrix, variant_ids
+
+
 @gin.configurable
-def sparse_cadd_dataset(sparse_matrix_file, split=0.3, random_state=42):
-    from scipy.sparse import load_npz
-    sparse_matrix = load_npz(sparse_matrix_file)
-    y = sparse_matrix[:,0]
-    X = sparse_matrix[:,1:]
-    print("Retrieved y", y.shape, "and X", X.shape)
+def sparse_cadd_dataset(sparse_matrix, targets_col=0, split=0.3, random_state=42):
+    """Splits a sparse matrix into train and test set.
+    Args:
+      sparse_matrix: path-like or csr_matrix instance.
+    """
+    if isinstance(sparse_matrix, str):
+        sparse_matrix = load_npz(sparse_matrix)
+    elif not isinstance(sparse_matrix, csr_matrix):
+        raise ValueError("Input must be either a path to a sparse matrix or an object of csr_matrix type.")
+
+    keep_cols = list(range(sparse_matrix.shape[1]))
+    keep_cols.remove(targets_col)
+        
+    X, y = sparse_matrix[:, keep_cols], sparse_matrix[:, targets_col]
+    print("Retrieved X", X.shape, "and y", y.shape)
     del sparse_matrix
 
     X_train, X_valid, y_train, y_valid = train_test_split(X, y, test_size=split, random_state=random_state)
     return (X_train, y_train), (X_valid, y_valid)
+
 
 def cadd_serialize_string_row(row, variant_id, separator, dtype=np.float16, target_col=0):
     row = np.array(row.split(separator), dtype=dtype)

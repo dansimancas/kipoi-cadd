@@ -180,7 +180,7 @@ def create_lmdb_from_iterator(
         (end - start) / 60))
 
     
-def load_csv_to_sparse_matrix(csv_file, blocksize=10E6, final_type=np.float32):
+def load_csv_to_sparse_matrix(csv_file, targets_col=0, blocksize=10E6, final_type=np.float32):
     import dask.dataframe as ddf
     from scipy.sparse import csr_matrix
     from dask.diagnostics import ProgressBar
@@ -198,13 +198,30 @@ def load_csv_to_sparse_matrix(csv_file, blocksize=10E6, final_type=np.float32):
     
     del df_dask
     
-    print("Changing -1 in the targets")
-    y_array = csr[:, 0].toarray()
+    print("Changing -1 in the targets...")
+    y_array = csr[:, targets_col].toarray()
     y_array[y_array==-1] = 0
     new_y = csr_matrix(y_array)
-    csr[:, 0] = new_y
+    csr[:, targets_col] = new_y
+    print("Done.")
     
     return csr
+
+
+def load_csv_to_pandas_sparse(csv_file, targets_col=0, blocksize=10E6, final_type=np.float32):
+    import dask.dataframe as ddf
+    from scipy.sparse import csr_matrix
+    from dask.diagnostics import ProgressBar
+    
+    print("Started dask task.")
+    df_dask = ddf.read_csv(csv_file, blocksize=blocksize, assume_missing=True)
+    df_dask = df_dask.map_partitions(lambda part: part.to_sparse(fill_value=0))
+    
+    with ProgressBar():
+        df_dask = df_dask.compute().reset_index(drop=True)
+    
+    print("Finished dask task.")
+    return df_dask
 
 
 def put_batches(csv_file, lmdb_batched_dir, batch_size=256, separator=','):
