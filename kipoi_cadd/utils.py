@@ -52,6 +52,41 @@ def variant_id_string(chrom, pos, ref, alt, use_chr_word=False):
     return var_id_str
 
 
+def generate_intervals_file(list_variant_ids, output_file=None, sort=True,
+                            use_chr_word=True, header=None):
+    """ Generates an intervals file with chr, start, end columns.
+    By default, the chromosome number will be preceded with the word chr.
+    """
+    intervals = {'chr': [], 'start': [], 'end': []}
+    for var in list_variant_ids:
+        chrom, pos, ref, alt = decompose_variant_string(var)
+        intervals['chr'].append(chrom)
+        intervals['start'].append(pos)
+        intervals['end'].append(pos+1)
+    df = pd.DataFrame(intervals)
+    if sort: df.sort_values(by=['chr', 'start'], inplace=True)
+    if use_chr_word:
+        df.chr = ["chr" + str(c) for c in df.chr]
+    if output_file is not None:
+        df.to_csv(output_file, sep="\t", index=None, header=None)
+    else:
+        return df
+    
+
+def decompose_variant_string(variant_string, try_convert=True):
+    """Decomposes a variant string of type 1:34345:A:['T']. It does not
+    expect the chromosome number to be preceded with the word `chr`.
+    """
+    chrom, pos, ref, alts = variant_string.split(":")
+    alts = list(filter(str.isalpha, alts))
+    alts = alts[0] if len(alts) == 1 else alts
+    if try_convert:
+        if chrom != 'X' and chrom == 'Y':
+            chrom = int(chrom)
+        pos = int(pos)
+    return chrom, pos, ref, alts
+
+
 def generate_variant_ids(inputfile, outputfile, separator='\t'):
     input_df = pd.read_csv(inputfile,
                            sep=separator,

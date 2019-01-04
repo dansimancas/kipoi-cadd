@@ -6,7 +6,7 @@ import lmdb
 import pickle
 import pandas as pd
 import sys
-from kipoi_cadd.utils import load_pickle, OrderedSet, get_all_files_extension
+from kipoi_cadd.utils import load_pickle, dump_to_pickle, OrderedSet, get_all_files_extension
 import logging
 from tqdm import tqdm
 from kipoi_cadd.data import cadd_serialize_numpy_row, cadd_serialize_string_row
@@ -208,7 +208,7 @@ def load_csv_to_sparse_matrix(csv_file, targets_col=0, blocksize=10E6, final_typ
     return csr
 
 
-def load_csv_to_pandas_sparse(csv_file, targets_col=0, blocksize=10E6, final_type=np.float32):
+def load_csv_to_pandas_sparse(csv_file, output, targets_col=0, blocksize=10E6, final_type=np.float32):
     import dask.dataframe as ddf
     from scipy.sparse import csr_matrix
     from dask.diagnostics import ProgressBar
@@ -221,8 +221,30 @@ def load_csv_to_pandas_sparse(csv_file, targets_col=0, blocksize=10E6, final_typ
         df_dask = df_dask.compute().reset_index(drop=True)
     
     print("Finished dask task.")
-    return df_dask
+    
+    dump_to_pickle(output, df_dask)
+    del df_dask
 
+    
+def load_csv_chunks_tosparse(filename, chunksize, dtype, num_lines, output=None, header=0, index_col=None):
+    from scipy.sparse import csr_matrix, vstack, save_npz
+    
+    full_matrix = None
+    tqdm_total = num_lines//chunksize if num_lines % chunksize > 0 else (num_lines//chunksize) - 1
+    
+    for chunk in tqdm(pd.read_csv(filename, chunksize=chunksize, dtype=dtype, header=header,
+                                  index_col=index_col), total=tqdm_total):
+        if full_matrix is None:
+            full_matrix = csr_matrix(chunk, shape=chunk.shape, dtype=dtype)
+        else:
+            chunk_csr = csr_matrix(chunk, shape=chunk.shape, dtype=dtype)
+            full_matrix = vstack([full_matrix, chunk_csr])
+    
+    if output is None:
+        return full_matrix
+    else:
+        save_npz(output, full_matrix)
+    
 
 def put_batches(csv_file, lmdb_batched_dir, batch_size=256, separator=','):
     with open(variant_ids, 'rb') as f:
