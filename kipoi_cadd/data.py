@@ -217,6 +217,70 @@ class CaddDataset(Dataset):
         return numpy_collate_concat([x for x in tqdm(it)])
 
 
+class KipoiLmdbDataset(Dataset):
+    def __init__(self, lmdb_dir, variant_id_file, version="1.3"):
+        """Reads LMDB database and obtains all predictions available for each variant.
+        """
+        self.version = version
+
+        self.lmdb_dir = lmbd_dir
+        self.lmdb_kipoi = None
+        self.txn = None
+        
+        self.variant_ids_file = variant_id_file
+        self.variant_ids = load_pickle(self.variant_ids_file)
+        self.variant_ids = self.variant_ids.values
+    
+    def __del__(self):
+        if self.lmdb_kipoi:
+            self.lmdb_kipoi.close()
+
+    def __getitem__(self, idx):
+        if self.lmdb_kipoi is None:
+            self.lmdb_kipoi = lmdb.open(self.lmdb_dir, readonly=True, lock=False)
+            self.txn = self.lmdb_kipoi.begin()
+
+        variant_id = self.variant_ids[idx]
+        buf = bytes(self.txn.get(variant_id.encode('ascii')))
+
+        item = pa.deserialize(buf)
+        item['targets'] = 0 if item['targets'] == -1 else item['targets']
+        if np.isinf(item['inputs']).any():
+            col = np.argmax(item['inputs'])
+            item['inputs'] = np.minimum(item['inputs'],  65500)
+
+        return item
+    
+    def load_all(self):
+        pass
+
+
+class KipoiCaddLmdbDataset(Dataset):
+    def __init__ (self, lmdb_dirs_list, variant_id):
+        # Instantiate each KipoiLMDBDaset
+        pass
+
+    def __len__(self):
+        # Check all lengths are the same
+        # Return one lengths
+        pass
+
+    def __getitem__(self):
+        """
+        Invoke getitem of all KipoiLMDBDaset
+        Merge dictionaries
+        Np.concatenate
+        """
+        pass
+
+    def get_column_names(self):
+        """
+        Columnnames
+        Get column names
+        """
+        pass
+
+
 def train_test_split_indexes(variant_id_file, test_size, random_state=1):
     variants = load_pickle(variant_id_file)
     train_vars, test_vars = train_test_split(
