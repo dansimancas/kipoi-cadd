@@ -1,3 +1,0 @@
-[console_scripts]
-kipoi_cadd = kipoi_cadd.__main__:main
-

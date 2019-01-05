@@ -29,6 +29,7 @@ __pycache__/*
 **/.snakemake/*
 */.snakemake/*
 .snakemake/*
+Snakefile
 
 # DS Store
 */.DS_Store
@@ -55,3 +56,7 @@ wheels/
 *.egg
 kipoi_cadd/cli/__pycache__/
 kipoi_cadd/__pycache__/
+
+# Other file extensions
+*.png
+*.smk
