@@ -158,7 +158,7 @@ class CaddBatchDataset(BatchDataset):
         return batch
 
 
-@gin.configurable
+# @gin.configurable
 class CaddDataset(Dataset):
     def __init__(self, lmbd_dir,
                  variant_id_file, version="1.3"):
@@ -223,13 +223,17 @@ class KipoiLmdbDataset(Dataset):
         """
         self.version = version
 
-        self.lmdb_dir = lmbd_dir
+        self.lmdb_dir = lmdb_dir
         self.lmdb_kipoi = None
         self.txn = None
+        self._column_names = None
         
         self.variant_ids_file = variant_id_file
         self.variant_ids = load_pickle(self.variant_ids_file)
         self.variant_ids = self.variant_ids.values
+    
+    def __len__(self):
+        return len(self.variant_ids)
     
     def __del__(self):
         if self.lmdb_kipoi:
@@ -244,15 +248,36 @@ class KipoiLmdbDataset(Dataset):
         buf = bytes(self.txn.get(variant_id.encode('ascii')))
 
         item = pa.deserialize(buf)
-        item['targets'] = 0 if item['targets'] == -1 else item['targets']
-        if np.isinf(item['inputs']).any():
-            col = np.argmax(item['inputs'])
-            item['inputs'] = np.minimum(item['inputs'],  65500)
-
-        return item
+        # We assume all variants have the same annotations structure, even if filled with NA.
+        if isinstance(self._column_names, np.ndarray) and not np.array_equal(self._column_names, item.index.values):
+            raise ValueError("All variants must have the same column names on their annotations.")
+        self._column_names = item.index.values
+        
+        return item.values
+    
+    def get_column_names(self):
+        return self._column_names
     
     def load_all(self):
-        pass
+        if self.lmdb_kipoi is None:
+            self.lmdb_kipoi = lmdb.open(self.lmdb_dir, readonly=True, lock=False)
+            self.txn = self.lmdb_kipoi.begin()
+        
+        it = iter(self.txn.cursor())
+        annos, var_ids = None, []
+        for key, value in it:
+            # We assume the key has been ascii-encoded and the value has been serialized with pyarrow.
+            var_ids.append(str(key, encoding="ascii"))
+            deserialized = pa.deserialize(value)
+            if annos is None:
+                annos = np.array([deserialized.values])
+                if self._column_names is None: self._column_names = deserialized.index.values
+                # self._column_names = self._column_names if self.column_names is not None else value.index.values
+            else:
+                b = np.array([deserialized.values])
+                annos = np.concatenate((annos, b), axis=0)
+        return pd.DataFrame(annos, index=[var_ids], columns=self._column_names)
+
 
 
 class KipoiCaddLmdbDataset(Dataset):
@@ -288,7 +313,7 @@ def train_test_split_indexes(variant_id_file, test_size, random_state=1):
     return train_vars, test_vars
 
 
-@gin.configurable
+# @gin.configurable
 def cadd_train_valid_data(lmdb_dir, train_id_file, valid_id_file):
     return CaddDataset(lmdb_dir, train_id_file), CaddDataset(lmdb_dir, valid_id_file)
 
@@ -324,7 +349,7 @@ def load_sparse_indexed_matrix(sparse_matrix, index_col=0, shuffle=False):
     return sparse_matrix, variant_ids
 
 
-@gin.configurable
+# @gin.configurable
 def sparse_cadd_dataset(sparse_matrix, targets_col=0, split=0.3, random_state=42):
     """Splits a sparse matrix into train and test set.
     Args:

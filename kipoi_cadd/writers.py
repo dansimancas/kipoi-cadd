@@ -22,16 +22,24 @@ class LmdbWriter(SyncPredictonsWriter):
     def __call__(self, predictions, records, line_ids=None):
         import pyarrow as pa
         
+        merged_preds = None
+        for k in predictions.keys():
+            if isinstance(predictions[k], pd.DataFrame):
+                coldict = {c: k + ":" + c for c in predictions[k].columns.values}
+                predictions[k].rename(columns=coldict, inplace=True)
+                if merged_preds is None:
+                    merged_preds = predictions[k]
+                else:
+                    merged_preds = merged_preds.join(predictions[k], how='outer')
+        
         self.env = lmdb.open(self.lmdb_dir , map_size=self.map_size, max_dbs=0, lock=False)
         with self.env.begin(write=True) as txn:
-            for var_num, var in enumerate(records):
+            for var_num, var in tqdm(enumerate(records), total=len(records)):
                 variant_id = variant_id_string(var.CHROM, var.POS, var.REF, var.ALT)
-                annotations = {}
-                for p in predictions:
-                    # Verify there is a prediction for this variant...
-                    annotations[p] = predictions[p].iloc[var_num, :]
+                # Obtain predictions for this variant...
+                annos = merged_preds.iloc[var_num, :]
 
-                buf = pa.serialize(annotations).to_buffer()
+                buf = pa.serialize(annos).to_buffer()
                 txn.put(variant_id.encode('ascii'), buf)
   
     def close(self):
