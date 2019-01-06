@@ -108,8 +108,7 @@ class CaddSparseDataset(Dataset):
     def __init__(self, sparse_npz_file, variant_ids_file, version="1.3"):
         self.data = load_npz(sparse_npz_file)
         self.variant_ids = load_pickle(variant_ids_file)
-        if isinstance(self.variant_ids, pd.Series):
-            self.variant_ids = self.variant_ids.values
+        self.variant_ids = self.variant_ids.values
     
     def __len__(self):
         return len(self.variant_ids)
@@ -121,6 +120,9 @@ class CaddSparseDataset(Dataset):
         item['variant_id'] = self.variant_ids[idx]
         
         return item
+    
+    def load_all(self):
+        return self.data[idx, 1:], self.data[idx, 0].toarray().ravel()
     
     
 class CaddBatchDataset(BatchDataset):
@@ -158,7 +160,7 @@ class CaddBatchDataset(BatchDataset):
         return batch
 
 
-# @gin.configurable
+@gin.configurable
 class CaddDataset(Dataset):
     def __init__(self, lmbd_dir,
                  variant_id_file, version="1.3"):
@@ -218,6 +220,9 @@ class CaddDataset(Dataset):
 
 
 class KipoiLmdbDataset(Dataset):
+    """Dataset class of a dataset obtained from kipoi predictions, and has been stored
+    in an LMDB database.
+    """
     def __init__(self, lmdb_dir, variant_id_file, version="1.3"):
         """Reads LMDB database and obtains all predictions available for each variant.
         """
@@ -272,38 +277,75 @@ class KipoiLmdbDataset(Dataset):
             if annos is None:
                 annos = np.array([deserialized.values])
                 if self._column_names is None: self._column_names = deserialized.index.values
-                # self._column_names = self._column_names if self.column_names is not None else value.index.values
             else:
                 b = np.array([deserialized.values])
                 annos = np.concatenate((annos, b), axis=0)
         return pd.DataFrame(annos, index=[var_ids], columns=self._column_names)
 
 
-
 class KipoiCaddLmdbDataset(Dataset):
-    def __init__ (self, lmdb_dirs_list, variant_id):
-        # Instantiate each KipoiLMDBDaset
-        pass
+    def __init__ (self, lmdb_dirs_list, variant_ids_file, version="1.3"):
+        self.version = version
+        
+        self.lmdb_dirs_list = lmdb_dirs_list
+        
+        self.variant_ids_file = variant_ids_file
+        self.variant_ids = load_pickle(self.variant_ids_file)
+        self.variant_ids = self.variant_ids.values
+        
+        self._column_names = None
+        
+        self.datasets = [KipoiLmdbDataset(db, variant_ids_file, version) for db in lmdb_dirs_list]
 
     def __len__(self):
-        # Check all lengths are the same
-        # Return one lengths
-        pass
-
-    def __getitem__(self):
-        """
-        Invoke getitem of all KipoiLMDBDaset
-        Merge dictionaries
-        Np.concatenate
-        """
-        pass
+        return len(self.variant_ids)
+    
+    def __del__(self):
+        for ds in self.datasets:
+            if ds.lmdb_kipoi:
+                ds.lmdb_kipoi.close()
+        
+    def __getitem__(self, idx):
+        item = cn = None
+        for ds in self.datasets:
+            if item is None:
+                item = np.array([ds[idx]])
+                cn = ds.get_column_names()
+            else:
+                item = np.concatenate([item, np.array([ds[idx]])], axis=1)
+                if np.isin(ds.get_column_names(), cn).any():
+                    mask = np.isin(ds.get_column_names(), cn)
+                    rep_names = ds.get_column_names()[mask]
+                    raise ValueError("There are repeated feature names: " + str(rep_names))
+                cn = np.concatenate((cn, ds.get_column_names()))
+        
+        if isinstance(self._column_names, np.ndarray):
+            if not np.array_equal(self._column_names, cn):
+                raise ValueError("All variants must have the same column names on their annotations." + 
+                                 " Your Kipoi LMDB has been corrupted.")
+        self._column_names = cn
+    
+        return item
+    
+    def load_all(self):
+        items = None
+        self._column_names = None
+        for ds in self.datasets:
+            if items is None:
+                items = ds.load_all()
+                self._column_names = ds.get_column_names()
+            else:
+                try:
+                    items = items.join(ds.load_all(), how='inner')
+                except ValueError:
+                    raise ValueError("Different datasets have equal feature names. Your Kipoi LMDB has" + 
+                                     " been corrupted or you have entered duplicate database paths.")
+                self._column_names = np.concatenate((self._column_names, ds.get_column_names()))
+                
+        return items
 
     def get_column_names(self):
-        """
-        Columnnames
-        Get column names
-        """
-        pass
+        return self._column_names
 
 
 def train_test_split_indexes(variant_id_file, test_size, random_state=1):
@@ -313,9 +355,14 @@ def train_test_split_indexes(variant_id_file, test_size, random_state=1):
     return train_vars, test_vars
 
 
-# @gin.configurable
+@gin.configurable
 def cadd_train_valid_data(lmdb_dir, train_id_file, valid_id_file):
     return CaddDataset(lmdb_dir, train_id_file), CaddDataset(lmdb_dir, valid_id_file)
+
+
+@gin.configurable
+def cadd_sparse_train_valid_data(train_npz_file, train_id_file, valid_npz_file, valid_id_file):
+    return CaddSparseDataset(train_npz_file, train_id_file), CaddSparseDataset(valid_npz_file, valid_id_file)
 
 
 def load_sparse_indexed_matrix(sparse_matrix, index_col=0, shuffle=False):
@@ -349,7 +396,7 @@ def load_sparse_indexed_matrix(sparse_matrix, index_col=0, shuffle=False):
     return sparse_matrix, variant_ids
 
 
-# @gin.configurable
+@gin.configurable
 def sparse_cadd_dataset(sparse_matrix, targets_col=0, split=0.3, random_state=42):
     """Splits a sparse matrix into train and test set.
     Args:
@@ -390,12 +437,3 @@ def cadd_serialize_numpy_row(row, variant_id, dtype=np.float16, target_col=0):
 def cadd_deserialize_bytes(bytes_row):
     variant_info = pa.deserialize(bytes_row)
     return variant_info
-
-
-def cadd_training(version='1.3'):
-    return dd.read_csv(f'/s/project/kipoi-cadd/data/v{version}/training_data.tsv.gz')
-
-
-#cd = CaddDataset("/s/project/kipoi-cadd/data/raw/v1.3/training_data/sample_variant_ids.pkl")
-#cd.__get_n_items__(cd.df_index.sample(10))
-# cadd_train_test_data("/s/project/kipoi-cadd/data/raw/v1.3/training_data/sample_variant_ids.pkl")

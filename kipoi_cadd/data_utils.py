@@ -230,7 +230,7 @@ def load_csv_chunks_tosparse(filename, chunksize, dtype, num_lines, output=None,
     from scipy.sparse import csr_matrix, vstack, save_npz
     
     full_matrix = None
-    tqdm_total = num_lines//chunksize if num_lines % chunksize > 0 else (num_lines//chunksize) - 1
+    tqdm_total = (num_lines//chunksize) + 1 if num_lines % chunksize > 0 else (num_lines/chunksize) - 1
     
     for chunk in tqdm(pd.read_csv(filename, chunksize=chunksize, dtype=dtype, header=header,
                                   index_col=index_col), total=tqdm_total):

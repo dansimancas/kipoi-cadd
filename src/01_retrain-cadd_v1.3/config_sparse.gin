@@ -12,10 +12,10 @@ import kipoi_cadd
 train_sklearn_logistic_regression.trainer_cls = @SklearnLogisticRegressionTrainer
 train_sklearn_logistic_regression.use_sparse_matrices=True
 train_sklearn_logistic_regression.model = @logistic_regression_scikit()
-logistic_regression_scikit.C = 1
+logistic_regression_scikit.C = 100
 logistic_regression_scikit.solver = 'lbfgs'
 logistic_regression_scikit.tolerance = 0.0001
-logistic_regression_scikit.max_iter = 13
+logistic_regression_scikit.max_iter = 500
 logistic_regression_scikit.verbose = 1
 logistic_regression_scikit.n_jobs = 64
 
@@ -29,6 +29,6 @@ train_sklearn_logistic_regression.eval_metric = @ClassificationMetrics()
 # --------------------------------------------
 # data
 train_sklearn_logistic_regression.data = @sparse_cadd_dataset()
-sparse_cadd_dataset.sparse_matrix_file = "/s/project/kipoi-cadd/data/raw/v1.3/training_data/sparse_all.npz"
+sparse_cadd_dataset.sparse_matrix = "/s/project/kipoi-cadd/data/raw/v1.3/training_data/sparse_all_ordered.npz"
 sparse_cadd_dataset.split = 0.3
 sparse_cadd_dataset.random_state = 42

@@ -4,7 +4,6 @@ import json
 from tqdm import tqdm
 import numpy as np
 import pandas as pd
-from kipoi_cadd.config import get_data_dir
 import pickle
 from collections import OrderedDict
 from tqdm import trange
@@ -52,6 +51,20 @@ def variant_id_string(chrom, pos, ref, alt, use_chr_word=False):
     return var_id_str
 
 
+def decompose_variant_string(variant_string, try_convert=True):
+    """Decomposes a variant string of type 1:34345:A:['T']. It does not
+    expect the chromosome number to be preceded with the word `chr`.
+    """
+    chrom, pos, ref, alts = variant_string.split(":")
+    alts = list(filter(str.isalpha, alts))
+    alts = alts[0] if len(alts) == 1 else alts
+    if try_convert:
+        if chrom != 'X' and chrom == 'Y':
+            chrom = int(chrom)
+        pos = int(pos)
+    return chrom, pos, ref, alts
+
+
 def generate_intervals_file(list_variant_ids, output_file=None, sort=True,
                             use_chr_word=True, header=None):
     """ Generates an intervals file with chr, start, end columns.
@@ -71,38 +84,26 @@ def generate_intervals_file(list_variant_ids, output_file=None, sort=True,
         df.to_csv(output_file, sep="\t", index=None, header=None)
     else:
         return df
-    
-
-def decompose_variant_string(variant_string, try_convert=True):
-    """Decomposes a variant string of type 1:34345:A:['T']. It does not
-    expect the chromosome number to be preceded with the word `chr`.
-    """
-    chrom, pos, ref, alts = variant_string.split(":")
-    alts = list(filter(str.isalpha, alts))
-    alts = alts[0] if len(alts) == 1 else alts
-    if try_convert:
-        if chrom != 'X' and chrom == 'Y':
-            chrom = int(chrom)
-        pos = int(pos)
-    return chrom, pos, ref, alts
 
 
-def generate_variant_ids(inputfile, outputfile, separator='\t'):
+def generate_variant_ids(inputfile, outputfile, separator='\t',
+                         variant_cols=['Chrom', 'Pos', 'Ref', 'Alt']):
     input_df = pd.read_csv(inputfile,
                            sep=separator,
-                           usecols=['Chrom', 'Pos', 'Ref', 'Alt'],
+                           usecols=variant_cols,
+                           # nrows=1000,
                            dtype={
                                'Chrom': 'str',
                                'Pos': np.int32,
                                'Ref': 'str',
                                'Alt': 'str'})
-    #                        nrows=10000)
+    
     variant_ids = input_df.apply(
-        lambda row: ':'.join([row[0], str(row[1]), row[2], ("['" +
-                             row[3] + "']")]), axis=1)
-        
-    with open(outputfile, 'wb') as f:
-        pickle.dump(variant_ids, f)
+        lambda row: ':'.join([str(row[0]), str(row[1]), row[2],
+                              str(row[3].split(','))]), axis=1)
+    
+    print(outputfile)
+    dump_to_pickle(outputfile, variant_ids)
 
 
 def generate_batch_idxs(shuffled_idxs_file,
@@ -146,12 +147,4 @@ def get_dtypes_info(dtype):
         return (np.finfo(dtype).min, np.finfo(dtype).max)
     else:
         return (np.iinfo(dtype).min, np.iinfo(dtype).max)
-
-
-if __name__ == '__main__':
-    inputfile = get_data_dir() + "/raw/v1.3/training_data/training_data.tsv"
-    shuffled_idxs_file = get_data_dir() + "/raw/v1.3/training_data/shuffle_splits/shuffled_index.pickle"
-    variant_id_file = get_data_dir() + "/raw/v1.3/training_data/variant_ids.pkl"
-    outputfile = get_data_dir() + "/raw/v1.3/training_data/shuffle_splits/batch_idxs_256.pkl"
-    generate_batch_idxs(shuffled_idxs_file, variant_id_file, 256, outputfile)
 
