@@ -1,0 +1,37 @@
+# you can import any other python modules
+# NOTE: if your code is not importable in python directly
+# you either have to `cd` into the directory containing the modules
+# or you need to add the folder with the python files to PYTHONPATH:
+# `export PYTHONPATH=$PYTHONPATH:~/my_directory/`
+import kipoi_cadd
+
+# ==================================================================
+# model.gin
+# --------------------------------------------
+# model
+train.trainer_cls = @SklearnLogisticRegressionTrainer
+train.model = @logistic_regression_scikit()
+logistic_regression_scikit.C = 10
+logistic_regression_scikit.solver = 'lbfgs'
+logistic_regression_scikit.tolerance = 0.0001
+logistic_regression_scikit.max_iter = 500
+logistic_regression_scikit.verbose = 1
+logistic_regression_scikit.n_jobs = 64
+
+# --------------------------------------------
+# Kipoi-Cadd-Dataset
+cadd_sparse_train_valid_data.version = '1.4'
+
+# --------------------------------------------
+# training
+train.eval_metric = @ClassificationMetrics()
+
+# ==================================================================
+# problem.gin
+# --------------------------------------------
+# data
+train.data = @cadd_sparse_train_valid_data()
+cadd_sparse_train_valid_data.train_npz_file = "/s/project/kipoi-cadd/data/raw/v1.4/training_data/GRCh37/sparse_matrices/train.npz"
+cadd_sparse_train_valid_data.train_id_file = "/s/project/kipoi-cadd/data/raw/v1.4/training_data/GRCh37/variant_ids/train.pkl"
+cadd_sparse_train_valid_data.valid_npz_file = "/s/project/kipoi-cadd/data/raw/v1.4/training_data/GRCh37/sparse_matrices/valid.npz"
+cadd_sparse_train_valid_data.valid_id_file = "/s/project/kipoi-cadd/data/raw/v1.4/training_data/GRCh37/variant_ids/valid.pkl"
