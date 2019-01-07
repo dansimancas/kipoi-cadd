@@ -104,6 +104,7 @@ class Dataset(BaseDataLoader):
         return numpy_collate_concat([x for x in tqdm(self.batch_iter(batch_size, **kwargs))])
 
 
+@gin.configurable
 class CaddSparseDataset(Dataset):
     def __init__(self, sparse_npz_file, variant_ids_file, version="1.3"):
         self.data = load_npz(sparse_npz_file)
@@ -122,7 +123,7 @@ class CaddSparseDataset(Dataset):
         return item
     
     def load_all(self):
-        return self.data[idx, 1:], self.data[idx, 0].toarray().ravel()
+        return self.data[:, 1:], self.data[:, 0].toarray().ravel()
     
     
 class CaddBatchDataset(BatchDataset):
@@ -356,13 +357,18 @@ def train_test_split_indexes(variant_id_file, test_size, random_state=1):
 
 
 @gin.configurable
-def cadd_train_valid_data(lmdb_dir, train_id_file, valid_id_file):
-    return CaddDataset(lmdb_dir, train_id_file), CaddDataset(lmdb_dir, valid_id_file)
+def cadd_train_valid_data(lmdb_dir, train_id_file,
+                          valid_id_file, version="1.3"):
+    return (CaddDataset(lmdb_dir, train_id_file, version), 
+            CaddDataset(lmdb_dir, valid_id_file, version))
 
 
 @gin.configurable
-def cadd_sparse_train_valid_data(train_npz_file, train_id_file, valid_npz_file, valid_id_file):
-    return CaddSparseDataset(train_npz_file, train_id_file), CaddSparseDataset(valid_npz_file, valid_id_file)
+def cadd_sparse_train_valid_data(train_npz_file, train_id_file,
+                                 valid_npz_file, valid_id_file,
+                                 version="1.3"):
+    return (CaddSparseDataset(train_npz_file, train_id_file, version),
+            CaddSparseDataset(valid_npz_file, valid_id_file, version))
 
 
 def load_sparse_indexed_matrix(sparse_matrix, index_col=0, shuffle=False):

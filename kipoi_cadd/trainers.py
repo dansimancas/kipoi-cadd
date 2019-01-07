@@ -109,7 +109,6 @@ class SklearnTrainer:
         return metric_res
 
 
-@gin.configurable
 class SklearnLogisticRegressionTrainer:
     """Simple Scikit Learn model trainer
     """
@@ -137,7 +136,7 @@ class SklearnLogisticRegressionTrainer:
         self.history_path = f"{self.output_dir}/history.csv"
         self.evaluation_path = f"{self.output_dir}/evaluation.valid.json"
 
-    def train(self, sample_weight=None, use_sparse_matrices=False, scaler_path=None, training_type=np.float32):
+    def train(self, sample_weight=None, scaler_path=None, training_type=np.float32):
         """Train the model
         Args:
           batch_size:
@@ -147,35 +146,26 @@ class SklearnLogisticRegressionTrainer:
 
         print("Started loading training dataset")
         
-        if isinstance(self.train_dataset[0], csr_matrix):
-            X_train, y_train = self.train_dataset
-            y_train = y_train.toarray().ravel()
-        else:
-            X_train, y_train = self.train_dataset.load_all()
+        X_train, y_train = self.train_dataset.load_all()
 
-            if len(self.valid_dataset) == 0:
-                raise ValueError("len(self.valid_dataset) == 0")
+        if len(self.valid_dataset) == 0:
+            raise ValueError("len(self.valid_dataset) == 0")
 
-            if use_sparse_matrices:
-                X_sparse = csr_matrix(X_train, shape=None, dtype=np.float32, copy=True)
-                X_train = X_sparse
-                del X_sparse
+        if scaler_path:
+            scaler = load_pickle(scaler_path)
+            print("Started scaling X.")
+            X_infl = X_train.astype(np.float32)
+            X_infl = scaler.transform(X_infl)
 
-            if scaler_path:
-                scaler = load_pickle(scaler_path)
-                print("Started scaling X.")
-                X_infl = X_train.astype(np.float32)
-                X_infl = scaler.transform(X_infl)
-
-                if training_type is not np.float32:    
-                    X_train = X_infl.astype(np.float16)
-                    if isinstance(X_train, csr_matrix):
-                        X_train.data = np.minimum(X_train.data, 65500)
-                    else:
-                        X_train = np.minimum(X_train, 65500)
-                    del X_infl
-                    print("The dataset was downscaled.")
-                print("Finished scaling X.")
+            if training_type is not np.float32:    
+                X_train = X_infl.astype(np.float16)
+                if isinstance(X_train, csr_matrix):
+                    X_train.data = np.minimum(X_train.data, 65500)
+                else:
+                    X_train = np.minimum(X_train, 65500)
+                del X_infl
+                print("The dataset was downscaled.")
+            print("Finished scaling X.")
         
         print("Finished loading training dataset. Shape: ", X_train.shape, "True values:", y_train.sum()/y_train.shape[0])
         self.model.fit(X_train,
@@ -188,12 +178,8 @@ class SklearnLogisticRegressionTrainer:
 
         joblib.dump(self.model, self.ckp_file)
 
-    #     def load_best(self):
-    #         """Load the best model from the Checkpoint file
-    #         """
-    #         self.model = load_model(self.ckp_file)
 
-    def evaluate(self, metric, use_sparse_matrices=False, scaler_path=None, eval_type=np.float32, save=True):
+    def evaluate(self, metric, scaler_path=None, eval_type=np.float32, save=True):
         """Evaluate the model on the validation set
         Args:
           metrics: a list or a dictionary of metrics
@@ -202,31 +188,22 @@ class SklearnLogisticRegressionTrainer:
         """
         print("Started loading validation dataset")
         
-        if isinstance(self.valid_dataset[0], csr_matrix):
-            X_valid, y_valid = self.valid_dataset
-            y_valid = y_valid.toarray().ravel()
-        else:
-            X_valid, y_valid = self.valid_dataset.load_all()
+        X_valid, y_valid = self.valid_dataset.load_all()
 
-            if use_sparse_matrices:
-                X_sparse = csr_matrix(X_valid, shape=None, dtype=np.float32, copy=True)
-                X_valid = X_sparse
-                del X_sparse
+        if scaler_path:
+            scaler = load_pickle(scaler_path)
+            print("Started scaling X.")
+            X_infl = X_valid.astype(np.float32)
+            X_infl = scaler.transform(X_infl)
 
-            if scaler_path:
-                scaler = load_pickle(scaler_path)
-                print("Started scaling X.")
-                X_infl = X_valid.astype(np.float32)
-                X_infl = scaler.transform(X_infl)
-
-                if eval_type is not np.float32:
-                    X_valid = X_infl.astype(np.float16)
-                    if isinstance(X_valid, csr_matrix):
-                        X_valid.data = np.minimum(X_valid.data, 65500)
-                    else:
-                        X_valid = np.minimum(X_valid, 65500)
-                    del X_infl
-                print("Finished scaling X.")
+            if eval_type is not np.float32:
+                X_valid = X_infl.astype(np.float16)
+                if isinstance(X_valid, csr_matrix):
+                    X_valid.data = np.minimum(X_valid.data, 65500)
+                else:
+                    X_valid = np.minimum(X_valid, 65500)
+                del X_infl
+            print("Finished scaling X.")
 
         print("Finished loading validation dataset. Shape: ", X_valid.shape, "True values:", y_valid.sum()/y_valid.shape[0])
         
