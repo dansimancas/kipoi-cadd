@@ -10,7 +10,7 @@ import lmdb
 import pickle
 import pandas as pd
 import sys
-from kipoi_cadd.utils import load_pickle
+from kipoi_cadd.utils import load_pickle, dump_to_pickle
 import logging
 from tqdm import tqdm, trange
 import time
@@ -106,7 +106,8 @@ class Dataset(BaseDataLoader):
 
 @gin.configurable
 class CaddSparseDataset(Dataset):
-    def __init__(self, sparse_npz_file, variant_ids_file, version="1.3"):
+    def __init__(self, sparse_npz_file, variant_ids_file, version="1.3",
+                 hg_assembly="GRCh37"):
         self.data = load_npz(sparse_npz_file)
         self.variant_ids = load_pickle(variant_ids_file)
         self.variant_ids = self.variant_ids.values
@@ -128,7 +129,7 @@ class CaddSparseDataset(Dataset):
     
 class CaddBatchDataset(BatchDataset):
     def __init__(self, lmbd_dir,
-                 batch_idx_file, version="1.3"):
+                 batch_idx_file, version="1.3", hg_assembly="GRCh37"):
 
         self.version = version
 
@@ -164,7 +165,7 @@ class CaddBatchDataset(BatchDataset):
 @gin.configurable
 class CaddDataset(Dataset):
     def __init__(self, lmbd_dir,
-                 variant_id_file, version="1.3"):
+                 variant_id_file, version="1.3", hg_assembly="GRCh37"):
 
         self.version = version
 
@@ -224,7 +225,7 @@ class KipoiLmdbDataset(Dataset):
     """Dataset class of a dataset obtained from kipoi predictions, and has been stored
     in an LMDB database.
     """
-    def __init__(self, lmdb_dir, variant_id_file, version="1.3"):
+    def __init__(self, lmdb_dir, variant_id_file, version="1.3", hg_assembly="GRCh37"):
         """Reads LMDB database and obtains all predictions available for each variant.
         """
         self.version = version
@@ -285,7 +286,7 @@ class KipoiLmdbDataset(Dataset):
 
 
 class KipoiCaddLmdbDataset(Dataset):
-    def __init__ (self, lmdb_dirs_list, variant_ids_file, version="1.3"):
+    def __init__ (self, lmdb_dirs_list, variant_ids_file, version="1.3", hg_assembly="GRCh37"):
         self.version = version
         
         self.lmdb_dirs_list = lmdb_dirs_list
@@ -403,11 +404,16 @@ def load_sparse_indexed_matrix(sparse_matrix, index_col=0, shuffle=False):
 
 
 @gin.configurable
-def sparse_cadd_dataset(sparse_matrix, targets_col=0, split=0.3, random_state=42):
+def sparse_cadd_dataset(sparse_matrix, variant_ids_file, targets_col=0, split=0.3,
+                        random_state=42, output_npz=None, output_ids=None,
+                        separate_x_y=False):
     """Splits a sparse matrix into train and test set.
     Args:
       sparse_matrix: path-like or csr_matrix instance.
     """
+    from sklearn.model_selection import ShuffleSplit
+    import os
+    
     if isinstance(sparse_matrix, str):
         sparse_matrix = load_npz(sparse_matrix)
     elif not isinstance(sparse_matrix, csr_matrix):
@@ -415,13 +421,28 @@ def sparse_cadd_dataset(sparse_matrix, targets_col=0, split=0.3, random_state=42
 
     keep_cols = list(range(sparse_matrix.shape[1]))
     keep_cols.remove(targets_col)
-        
-    X, y = sparse_matrix[:, keep_cols], sparse_matrix[:, targets_col]
-    print("Retrieved X", X.shape, "and y", y.shape)
+    
+    variant_ids = load_pickle(variant_ids_file)
+    rs = ShuffleSplit(n_splits=1, test_size=split, random_state=random_state)
+    train_index, valid_index = next(rs.split(variant_ids))
+    
+    train, valid = sparse_matrix[train_index], sparse_matrix[valid_index]
+    train_ids, valid_ids = variant_ids[train_index], variant_ids[valid_index]
+    
+    if separate_x_y:
+        train = train[:, keep_cols], train[:, targets_col]
+        valid = valid[:, keep_cols], valid[:, targets_col]
+    
     del sparse_matrix
-
-    X_train, X_valid, y_train, y_valid = train_test_split(X, y, test_size=split, random_state=random_state)
-    return (X_train, y_train), (X_valid, y_valid)
+    
+    if output_npz is not None:
+        save_npz(os.path.join(output_npz, "train.npz"), train)
+        save_npz(os.path.join(output_npz, "valid.npz"), valid)
+    if output_ids is not None:
+        dump_to_pickle(os.path.join(output_ids, "train.pkl"), train_ids)
+        dump_to_pickle(os.path.join(output_ids, "valid.pkl"), valid_ids)
+        
+    return (train, train_ids), (valid, valid_ids)
 
 
 def cadd_serialize_string_row(row, variant_id, separator, dtype=np.float16, target_col=0):
