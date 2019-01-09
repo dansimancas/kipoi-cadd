@@ -85,19 +85,80 @@ def generate_intervals_file(list_variant_ids, output_file=None, sort=True,
     else:
         return df
 
+    
+def generate_intervals_from_vcf(vcf,
+                                output=None,
+                                col_names=['#CHROM', 'POS', 'ID', 'REF', 'ALT'],
+                                dtypes={'#CHROM': 'str', 'POS': 'int32', 'ID': 'str', 'REF':'str', 'ALT':'str'}):
+    if isinstance(vcf, str):
+        vcf = pd.read_csv(vcf,
+                          sep='\t',
+                          dtype=dtypes,
+                          header= None,
+                          names=col_names,
+                          usecols=range(len(col_names)),
+                          comment='#')
+    elif not isinstance(sparse_matrix, pd.DataFrame):
+        raise ValueError("Input must be either a path to a vcf(.gz) file or an object of pd.DataFrame type.")
+    
+    intervals = {'chr': [], 'start': [], 'end': []}
+    for _, row in tqdm(vcf.iterrows(), total=vcf.shape[0]):
+        intervals['chr'].append(row['#CHROM'])
+        intervals['start'].append(row['POS'] - 1)
+        intervals['end'].append((row['POS'] - 1) + len(row['REF']))
+    
+    df = pd.DataFrame(intervals, index=range(len(intervals['chr'])))
+    df.sort_values(by=['chr', 'start'], inplace=True)
+    df.reset_index(drop=True, inplace=True)
+    if output is not None:
+        df.to_csv(output, sep='\t', index=None, header=None)
+    return df
+
+
+def concatenate_vcf_files(directory, output=None):
+    ext = "vcf.gz"
+    vcf = None
+    col_names = ['#CHROM', 'POS', 'ID', 'REF', 'ALT']
+    for f in get_all_files_extension(training_dir_hg37, ext):
+        if vcf is None:
+            vcf = pd.read_csv(f, sep='\t', comment='#', names=col_names,
+                              dtypes={0:'str',
+                                      1:'int32',
+                                      2:'str',
+                                      3:'str',
+                                      4:'str'})
+        else:
+            vcf = pd.concat([vcf, 
+                             pd.read_csv(f, sep='\t', comment='#', names=col_names,
+                                         dtypes={0:'str',
+                                                 1:'int32',
+                                                 2:'str',
+                                                 3:'str',
+                                                 4:'str'})], ignore_index=True)
+        print(f)
+    # vcf.astype(dtype={'#CHROM':'object', 'POS':'int32', 'ID':'object', 'REF':'object', 'ALT':'object'})
+    vcf.sort_values(by=['#CHROM', 'POS'], inplace=True)
+    vcf.reset_index(drop=True, inplace=True)
+    if output is not None:
+        vcf.to_csv(os.path.join(training_dir_hg37, "all.vcf.gz"), sep='\t', index=None)
+    return vcf
+
 
 def generate_variant_ids(inputfile, outputfile, separator='\t',
-                         variant_cols=['Chrom', 'Pos', 'Ref', 'Alt']):
+                         header=0,
+                         variant_cols=['Chrom', 'Pos', 'Ref', 'Alt'],
+                         dtype={'Chrom': 'str', 'Pos': np.int32, 'Ref': 'str',
+                                'Alt': 'str'}):
     input_df = pd.read_csv(inputfile,
                            sep=separator,
+                           header=header,
                            usecols=variant_cols,
                            # nrows=1000,
-                           dtype={
-                               'Chrom': 'str',
-                               'Pos': np.int32,
-                               'Ref': 'str',
-                               'Alt': 'str'})
+                           dtype=dtype)
     
+    if header is None:
+        # Make sure column numbers are reset
+        input_df = input_df.T.reset_index(drop=True).T
     variant_ids = input_df.apply(
         lambda row: ':'.join([str(row[0]), str(row[1]), row[2],
                               str(row[3].split(','))]), axis=1)

@@ -1,5 +1,7 @@
 from kipoi_veff.utils.io import SyncPredictonsWriter
 from kipoi_cadd.utils import variant_id_string
+import pandas as pd
+from tqdm import tqdm
 import logging
 import lmdb
 
@@ -15,8 +17,9 @@ class LmdbWriter(SyncPredictonsWriter):
       lmdb_dir: str - Directory where the lmdb database will be created.
       map_size: int - Map size used to initialize the lmdb (number of bytes).
     """
-    def __init__(self, lmdb_dir, map_size=10E8):
+    def __init__(self, lmdb_dir, db_name, map_size=10E8):
         self.lmdb_dir = lmdb_dir
+        self.db_name = db_name
         self.map_size = map_size
     
     def __call__(self, predictions, records, line_ids=None):
@@ -25,14 +28,14 @@ class LmdbWriter(SyncPredictonsWriter):
         merged_preds = None
         for k in predictions.keys():
             if isinstance(predictions[k], pd.DataFrame):
-                coldict = {c: k + ":" + c for c in predictions[k].columns.values}
+                coldict = {c: self.db_name + ":" + k + "_" + c for c in predictions[k].columns.values}
                 predictions[k].rename(columns=coldict, inplace=True)
                 if merged_preds is None:
                     merged_preds = predictions[k]
                 else:
                     merged_preds = merged_preds.join(predictions[k], how='outer')
         
-        self.env = lmdb.open(self.lmdb_dir , map_size=self.map_size, max_dbs=0, lock=False)
+        self.env = lmdb.open(self.lmdb_dir, map_size=self.map_size, max_dbs=0, lock=False)
         with self.env.begin(write=True) as txn:
             for var_num, var in tqdm(enumerate(records), total=len(records)):
                 variant_id = variant_id_string(var.CHROM, var.POS, var.REF, var.ALT)

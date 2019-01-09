@@ -117,7 +117,7 @@ class CaddSparseDataset(Dataset):
     
     def __getitem__(self, idx):
         item = {'inputs': None, 'targets': None, 'variant_id': None} 
-        item['inputs'] = self.data[idx, 1:].toarray()
+        item['inputs'] = self.data[idx, 1:].toarray().ravel()
         item['targets'] = self.data[idx, 0]
         item['variant_id'] = self.variant_ids[idx]
         
@@ -368,8 +368,8 @@ def cadd_train_valid_data(lmdb_dir, train_id_file,
 def cadd_sparse_train_valid_data(train_npz_file, train_id_file,
                                  valid_npz_file, valid_id_file,
                                  version="1.3"):
-    return (CaddSparseDataset(train_npz_file, train_id_file, version),
-            CaddSparseDataset(valid_npz_file, valid_id_file, version))
+    return CaddSparseDataset(train_npz_file, train_id_file, version),\
+           CaddSparseDataset(valid_npz_file, valid_id_file, version)
 
 
 def load_sparse_indexed_matrix(sparse_matrix, index_col=0, shuffle=False):
