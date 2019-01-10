@@ -12,8 +12,8 @@ import kipoi_cadd
 train.trainer_cls = @KerasTrainer
 train.model = @logistic_regression_keras()
 logistic_regression_keras.n_features=904
-logistic_regression_keras.l2_regularization=1.0
-logistic_regression_keras.learning_rate=0.015
+logistic_regression_keras.l2_regularization=0.001
+logistic_regression_keras.learning_rate=0.0015
 
 
 # --------------------------------------------
@@ -25,7 +25,7 @@ cadd_sparse_train_valid_data.version = '1.4'
 train.eval_metric = @ClassificationMetrics()
 train.num_workers = 16
 train.batch_size = 32
-train.epochs = 50
+train.epochs = 1
 
 # ==================================================================
 # problem.gin

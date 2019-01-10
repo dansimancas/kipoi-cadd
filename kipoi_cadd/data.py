@@ -116,7 +116,7 @@ class CaddSparseDataset(Dataset):
         return len(self.variant_ids)
     
     def __getitem__(self, idx):
-        item = {'inputs': None, 'targets': None, 'variant_id': None} 
+        item = {'inputs': None, 'targets': None, 'variant_id': None}
         item['inputs'] = self.data[idx, 1:].toarray().ravel()
         item['targets'] = self.data[idx, 0]
         item['variant_id'] = self.variant_ids[idx]
