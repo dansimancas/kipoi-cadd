@@ -89,12 +89,11 @@ dataloader = model.default_dataloader
 # map_size = calculate_map_size(ds[0], num_lines, 1.9)
 writer = LmdbWriter(lmdb_deep_sea, "DeepSea_veff", 274578419865)
 
-
 if __name__ == "__main__":
     sp.predict_snvs(model,
                 dataloader,
                 vcf_file,
-                64,
+                16,
                 num_workers=64,
                 dataloader_args=dl_kwargs,
                 evaluation_function_kwargs={'diff_types': {'logit': Logit()}},
