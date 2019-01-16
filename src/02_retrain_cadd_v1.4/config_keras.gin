@@ -12,8 +12,8 @@ import kipoi_cadd
 train.trainer_cls = @KerasTrainer
 train.model = @logistic_regression_keras()
 logistic_regression_keras.n_features=904
-logistic_regression_keras.l2_regularization=0.001
-logistic_regression_keras.learning_rate=0.0015
+logistic_regression_keras.l2_regularization=1
+logistic_regression_keras.learning_rate=0.15
 
 
 # --------------------------------------------
@@ -23,16 +23,22 @@ cadd_sparse_train_valid_data.version = '1.4'
 # --------------------------------------------
 # training
 train.eval_metric = @ClassificationMetrics()
-train.num_workers = 16
-train.batch_size = 32
+train.num_workers = 1
+train.batch_size = 64
 train.epochs = 1
 
 # ==================================================================
 # problem.gin
 # --------------------------------------------
 # data
-train.data = @cadd_sparse_train_valid_data()
-cadd_sparse_train_valid_data.train_npz_file = "/s/project/kipoi-cadd/data/raw/v1.4/training_data/GRCh37/sparse_matrices/train.npz"
-cadd_sparse_train_valid_data.train_id_file = "/s/project/kipoi-cadd/data/raw/v1.4/training_data/GRCh37/variant_ids/train.pkl"
-cadd_sparse_train_valid_data.valid_npz_file = "/s/project/kipoi-cadd/data/raw/v1.4/training_data/GRCh37/sparse_matrices/valid.npz"
-cadd_sparse_train_valid_data.valid_id_file = "/s/project/kipoi-cadd/data/raw/v1.4/training_data/GRCh37/variant_ids/valid.pkl"
+train.data = @cadd_sparse_train_valid_data_one()
+
+# cadd_sparse_train_valid_data.train_npz_file = "/s/project/kipoi-cadd/data/raw/v1.4/training_data/GRCh37/sparse_matrices/train.npz"
+# cadd_sparse_train_valid_data.train_id_file = "/s/project/kipoi-cadd/data/raw/v1.4/training_data/GRCh37/variant_ids/train.pkl"
+# cadd_sparse_train_valid_data.valid_npz_file = "/s/project/kipoi-cadd/data/raw/v1.4/training_data/GRCh37/sparse_matrices/valid.npz"
+# cadd_sparse_train_valid_data.valid_id_file = "/s/project/kipoi-cadd/data/raw/v1.4/training_data/GRCh37/variant_ids/valid.pkl"
+
+cadd_sparse_train_valid_data_one.data = @sparse_cadd_dataset()
+sparse_cadd_dataset.sparse_matrix = "/s/project/kipoi-cadd/data/raw/v1.4/training_data/GRCh37/sparse_matrices/sample_10k.npz"
+sparse_cadd_dataset.variant_ids_file = "/s/project/kipoi-cadd/data/raw/v1.4/training_data/GRCh37/variant_ids/sample_10k.pkl"
+

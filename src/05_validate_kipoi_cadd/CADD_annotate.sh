@@ -4,6 +4,7 @@ usage="$(basename "$0") [-c <cadddir>] [-o <outfile>] [-g <genomebuild>] [-a] <i
 
 where:
     -h  show this help text
+    -c  CADD dir
     -o  out tsv.gz file (generated from input file name if not set)
     -g  genome build (supported are GRCh37 and GRCh38 [default: GRCh38])
     -a  include annotation in output
@@ -15,7 +16,7 @@ unset OPTIND
 GENOMEBUILD="GRCh38"
 ANNOTATION=false
 OUTFILE=""
-while getopts ':ho:g:a' option; do
+while getopts ':hc:o:g:a' option; do
   case "$option" in
     h) echo "$usage"
        exit

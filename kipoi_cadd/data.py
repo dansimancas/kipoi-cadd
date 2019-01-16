@@ -106,10 +106,17 @@ class Dataset(BaseDataLoader):
 
 @gin.configurable
 class CaddSparseDataset(Dataset):
-    def __init__(self, sparse_npz_file, variant_ids_file, version="1.3",
+    def __init__(self, sparse_npz, variant_ids, version="1.3",
                  hg_assembly="GRCh37"):
-        self.data = load_npz(sparse_npz_file)
-        self.variant_ids = load_pickle(variant_ids_file)
+        if isinstance(sparse_npz, str) and isinstance(variant_ids, str):
+            self.data = load_npz(sparse_npz)
+            self.variant_ids = load_pickle(variant_ids)
+        elif isinstance(sparse_npz, csr_matrix) and isinstance(variant_ids, pd.Series):
+            self.data = sparse_npz
+            self.variant_ids = variant_ids
+        else:
+            raise ValueError("Inputs must be either a paths or objects of csr_matrix and pd.Series types.")
+
         self.variant_ids = self.variant_ids.values
     
     def __len__(self):
@@ -368,6 +375,13 @@ def cadd_train_valid_data(lmdb_dir, train_id_file,
 def cadd_sparse_train_valid_data(train_npz_file, train_id_file,
                                  valid_npz_file, valid_id_file,
                                  version="1.3"):
+    return CaddSparseDataset(train_npz_file, train_id_file, version),\
+           CaddSparseDataset(valid_npz_file, valid_id_file, version)
+
+
+@gin.configurable
+def cadd_sparse_train_valid_data_one(data, version="1.3"):
+    (train_npz_file, train_id_file), (valid_npz_file, valid_id_file) = data
     return CaddSparseDataset(train_npz_file, train_id_file, version),\
            CaddSparseDataset(valid_npz_file, valid_id_file, version)
 

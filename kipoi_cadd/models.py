@@ -6,6 +6,7 @@ from keras.regularizers import l2
 from keras.optimizers import Adam
 import gin
 from sklearn.linear_model import SGDClassifier, LogisticRegression
+from keras.metrics import binary_accuracy, mae
 
 @gin.configurable
 def logistic_regression_keras(n_features, l2_regularization=1.0, learning_rate=0.015):
@@ -13,7 +14,7 @@ def logistic_regression_keras(n_features, l2_regularization=1.0, learning_rate=0
         kl.Dense(1, activation='sigmoid', kernel_regularizer=l2(l2_regularization), input_shape=(n_features, ))
         ]
         )
-    model.compile(Adam(lr=learning_rate), "binary_crossentropy", ['acc'])
+    model.compile(Adam(lr=learning_rate), "binary_crossentropy", [mae, binary_accuracy])
     return model
 
 @gin.configurable
