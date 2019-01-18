@@ -435,6 +435,7 @@ def sparse_cadd_dataset(sparse_matrix, variant_ids_file, targets_col=0, split=0.
 
     keep_cols = list(range(sparse_matrix.shape[1]))
     keep_cols.remove(targets_col)
+    assert targets_col not in keep_cols
     
     variant_ids = load_pickle(variant_ids_file)
     rs = ShuffleSplit(n_splits=1, test_size=split, random_state=random_state)

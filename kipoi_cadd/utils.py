@@ -149,6 +149,13 @@ def generate_variant_ids(inputfile, outputfile, separator='\t',
                          variant_cols=['Chrom', 'Pos', 'Ref', 'Alt'],
                          dtype={'Chrom': 'str', 'Pos': np.int32, 'Ref': 'str',
                                 'Alt': 'str'}):
+    
+    print(inputfile)
+    with open(inputfile, 'r') as f:
+        for l in f.readlines():
+            print(l)
+            break
+
     input_df = pd.read_csv(inputfile,
                            sep=separator,
                            header=header,
@@ -192,14 +199,27 @@ def generate_batch_idxs(shuffled_idxs_file,
         pickle.dump(batch_indexes, f)
 
 
-def get_all_files_extension(folder, extension):
+def get_all_files_extension(folder, extension, recursive=False, full_path=True):
     import os
+    
     all_files = []
-    for root, _, filenames in os.walk(folder):
-        for filename in filenames: 
-            all_files.append(os.path.join(root,filename))
-
+    if recursive:
+        for root, _, filenames in os.walk(folder):
+            for filename in filenames:
+                if full_path:
+                    all_files.append(os.path.join(root,filename))
+                else:
+                    all_files.append(filename)
+    else:
+        tmp = [f for f in os.listdir(folder) if os.path.isfile(
+            os.path.join(folder, f))]
+        for filename in tmp:
+            if full_path:
+                all_files.append(os.path.join(folder,filename))
+            else:
+                all_files.append(filename)
     all_wanted = [f for f in all_files if f.endswith(extension)]
+
     return all_wanted
 
 

@@ -30,10 +30,10 @@ def sgd_classifier(alpha=1.0, max_iter=None, tolerance=None, verbose=True,
 
 @gin.configurable
 def logistic_regression_scikit(C=1.0, tolerance=0.0001, solver='lbfgs', max_iter=10, verbose=1,
-                               n_jobs=None):
+                               warm_start=False, n_jobs=None):
     clf = LogisticRegression(penalty='l2', dual=False, tol=tolerance, C=C, random_state=1,
                              solver=solver, max_iter=max_iter, multi_class='ovr', verbose=verbose,
-                             n_jobs=n_jobs)
+                             warm_start=warm_start, n_jobs=n_jobs)
     return clf
 
 def fc_nn():

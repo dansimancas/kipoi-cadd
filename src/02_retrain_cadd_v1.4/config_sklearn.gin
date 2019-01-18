@@ -14,8 +14,9 @@ train.model = @logistic_regression_scikit()
 logistic_regression_scikit.C = 1
 logistic_regression_scikit.solver = 'lbfgs'
 logistic_regression_scikit.tolerance = 0.0001
-logistic_regression_scikit.max_iter = 50
+logistic_regression_scikit.max_iter = 13
 logistic_regression_scikit.verbose = 1
+logistic_regression_scikit.warm_start = True
 logistic_regression_scikit.n_jobs = 64
 
 
@@ -26,7 +27,7 @@ cadd_sparse_train_valid_data.version = '1.4'
 # --------------------------------------------
 # training
 train.eval_metric = @ClassificationMetrics()
-train.scaler_path = "/s/project/kipoi-cadd/data/models/CADD1.4-GRCh37.scaler"
+train.scaler_path = "/s/project/kipoi-cadd/data/models/KipoiCadd_newdata-GRCh37.scaler"
 
 # ==================================================================
 # problem.gin
@@ -34,13 +35,17 @@ train.scaler_path = "/s/project/kipoi-cadd/data/models/CADD1.4-GRCh37.scaler"
 # data
 
 train.data = @cadd_sparse_train_valid_data()
-cadd_sparse_train_valid_data.train_npz_file = "/s/project/kipoi-cadd/data/raw/v1.4/training_data/GRCh37/sparse_matrices/train.npz"
-cadd_sparse_train_valid_data.train_id_file = "/s/project/kipoi-cadd/data/raw/v1.4/training_data/GRCh37/variant_ids/train.pkl"
-cadd_sparse_train_valid_data.valid_npz_file = "/s/project/kipoi-cadd/data/raw/v1.4/training_data/GRCh37/sparse_matrices/valid.npz"
-cadd_sparse_train_valid_data.valid_id_file = "/s/project/kipoi-cadd/data/raw/v1.4/training_data/GRCh37/variant_ids/valid.pkl"
+# cadd_sparse_train_valid_data.train_npz_file = "/s/project/kipoi-cadd/data/raw/v1.4/training_data/GRCh37/sparse_matrices/train.npz"
+# cadd_sparse_train_valid_data.train_id_file = "/s/project/kipoi-cadd/data/raw/v1.4/training_data/GRCh37/variant_ids/train.pkl"
+# cadd_sparse_train_valid_data.valid_npz_file = "/s/project/kipoi-cadd/data/raw/v1.4/training_data/GRCh37/sparse_matrices/valid.npz"
+# cadd_sparse_train_valid_data.valid_id_file = "/s/project/kipoi-cadd/data/raw/v1.4/training_data/GRCh37/variant_ids/valid.pkl"
+
+cadd_sparse_train_valid_data.train_npz_file = "/s/project/kipoi-cadd/data/processed/v1.4/training_data/sparse_matrices/train.npz"
+cadd_sparse_train_valid_data.train_id_file = "/s/project/kipoi-cadd/data/processed/v1.4/training_data/variant_ids/train.pkl"
+cadd_sparse_train_valid_data.valid_npz_file = "/s/project/kipoi-cadd/data/processed/v1.4/training_data/sparse_matrices/valid.npz"
+cadd_sparse_train_valid_data.valid_id_file = "/s/project/kipoi-cadd/data/processed/v1.4/training_data/variant_ids/valid.pkl"
 
 # train.data = @cadd_sparse_train_valid_data_one()
 # cadd_sparse_train_valid_data_one.data = @sparse_cadd_dataset()
 # sparse_cadd_dataset.sparse_matrix = "/s/project/kipoi-cadd/data/raw/v1.4/training_data/GRCh37/sparse_matrices/sample_10k.npz"
 # sparse_cadd_dataset.variant_ids_file = "/s/project/kipoi-cadd/data/raw/v1.4/training_data/GRCh37/variant_ids/sample_10k.pkl"
-
