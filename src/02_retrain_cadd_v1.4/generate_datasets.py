@@ -18,19 +18,25 @@ TRAINING_DATA_FILES = [
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("input_dir")
-    parser.add_argument("output_dir")
+    parser.add_argument("input_dir", help="Training directory of the specific genome build.")
+    parser.add_argument("output_dir", help="Output directory of the specific genome build.")
     parser.add_argument("assembly", default="GRCh37")
     parser.add_argument("--split", default=False, action='store_true')
-    parser.add_argument("--scaler-path", type=str, default=True)
+    parser.add_argument("--scaler-path", type=str, default=None)
     args = parser.parse_args()
 
-    print(str(args))
+    for arg in vars(args):
+        print(arg, getattr(args, arg))
 
     training_dir = args.input_dir
     output_dir = args.output_dir
     variant_ids_dir = os.path.join(output_dir, "variant_ids")
     sparse_matrices_dir = os.path.join(output_dir, "sparse_matrices")
+
+    if not os.path.exists(variant_ids_dir):
+        os.makedirs(variant_ids_dir)
+    if not os.path.exists(sparse_matrices_dir):
+        os.makedirs(sparse_matrices_dir)
 
     if args.assembly == "GRCh37":
         variant_cols = ['#Chr', 'Pos', 'Ref', 'Alt']
@@ -67,7 +73,7 @@ if __name__ == "__main__":
         print("Merging variant ids...")
         all_ids = None
         for f in tqdm(TRAINING_DATA_FILES):
-            inputfile = os.path.join(variant_ids_dir, f, ".pkl")
+            inputfile = os.path.join(variant_ids_dir, f + ".pkl")
             if all_ids is None:
                 all_ids = load_pickle(inputfile)
             else:

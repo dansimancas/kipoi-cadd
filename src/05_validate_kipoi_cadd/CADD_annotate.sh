@@ -1,27 +1,14 @@
 #!/bin/bash
 
-usage="$(basename "$0") [-c <cadddir>] [-o <outfile>] [-g <genomebuild>] [-a] <infile>  -- CADD version 1.4
-
-where:
-    -h  show this help text
-    -c  CADD dir
-    -o  out tsv.gz file (generated from input file name if not set)
-    -g  genome build (supported are GRCh37 and GRCh38 [default: GRCh38])
-    -a  include annotation in output
-        input vcf of vcf.gz file (required)"
-
-unset OPTARG
-unset OPTIND
-
-GENOMEBUILD="GRCh38"
-ANNOTATION=false
 OUTFILE=""
-while getopts ':hc:o:g:a' option; do
+while getopts ':hc:i:o:g:a' option; do
   case "$option" in
     h) echo "$usage"
        exit
        ;;
     c) CADD=$OPTARG
+       ;;
+    i) INFILE=$OPTARG
        ;;
     o) OUTFILE=$OPTARG
        ;;
@@ -29,15 +16,10 @@ while getopts ':hc:o:g:a' option; do
        ;;
     a) ANNOTATION=true
        ;;
-   \?) printf "illegal option: -%s\n" "$OPTARG" >&2
-       echo "$usage" >&2
-       exit 1
+   \?) echo "Invalid option -$OPTARG" >&2
        ;;
   esac
 done
-shift $((OPTIND-1))
-
-INFILE=$1
 
 echo "CADD-v1.4 (c) University of Washington, Hudson-Alpha Institute for Biotechnology and Berlin Institute of Health 2013-2018. All rights reserved."
 
@@ -49,9 +31,6 @@ FILENAME=$(basename $INFILE)
 NAME=${FILENAME%\.vcf*}
 FILEDIR=$(dirname $INFILE)
 FILEFORMAT=${FILENAME#$NAME\.}
-
-SCRIPT=$(readlink -f "$0")
-export CADD=$CADD
 
 if [ "$FILEFORMAT" != "vcf" ] && [ "$FILEFORMAT" != "vcf.gz" ]
 then
@@ -76,6 +55,8 @@ then
 else
     ANNO_FOLDER="no_anno"
 fi
+
+export CADD=$CADD
 
 # Pipeline configuration
 PRESCORED_FOLDER=$CADD/data/prescored/$GENOMEBUILD/$ANNO_FOLDER
@@ -141,8 +122,3 @@ cat $TMP_VCF \
 | python $CADD/src/scripts/annotateVEPvcf.py -c $REFERENCE_CONFIG \
 | gzip -c > $TMP_ANNO
 rm $TMP_VCF
-
-# Imputation
-zcat $TMP_ANNO \
-| python $CADD/src/scripts/trackTransformation.py -b \
-            -c $IMPUTE_CONFIG -o $TMP_IMP --noheader;

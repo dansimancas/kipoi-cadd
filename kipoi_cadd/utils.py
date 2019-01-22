@@ -122,7 +122,7 @@ def concatenate_vcf_files(directory, output=None):
     for f in get_all_files_extension(training_dir_hg37, ext):
         if vcf is None:
             vcf = pd.read_csv(f, sep='\t', comment='#', names=col_names,
-                              dtypes={0:'str',
+                              dtype={0:'str',
                                       1:'int32',
                                       2:'str',
                                       3:'str',
@@ -130,7 +130,7 @@ def concatenate_vcf_files(directory, output=None):
         else:
             vcf = pd.concat([vcf, 
                              pd.read_csv(f, sep='\t', comment='#', names=col_names,
-                                         dtypes={0:'str',
+                                         dtype={0:'str',
                                                  1:'int32',
                                                  2:'str',
                                                  3:'str',
@@ -148,20 +148,17 @@ def generate_variant_ids(inputfile, outputfile, separator='\t',
                          header=0,
                          variant_cols=['Chrom', 'Pos', 'Ref', 'Alt'],
                          dtype={'Chrom': 'str', 'Pos': np.int32, 'Ref': 'str',
-                                'Alt': 'str'}):
-    
-    print(inputfile)
-    with open(inputfile, 'r') as f:
-        for l in f.readlines():
-            print(l)
-            break
+                                'Alt': 'str'},
+                         comment=None):
 
     input_df = pd.read_csv(inputfile,
-                           sep=separator,
-                           header=header,
-                           usecols=variant_cols,
-                           # nrows=1000,
-                           dtype=dtype)
+                        sep=separator,
+                        header=header,
+                        names=variant_cols,
+                        usecols=variant_cols,
+                        # nrows=1000,
+                        dtype=dtype,
+                        comment=comment)
     
     if header is None:
         # Make sure column numbers are reset

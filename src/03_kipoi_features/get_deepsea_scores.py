@@ -6,6 +6,8 @@ import os
 import pyarrow as pa
 from kipoi_veff.utils.io import SyncPredictonsWriter, SyncBatchWriter
 import pandas as pd
+from tqdm import tqdm
+import numpy as np
 import logging
 import lmdb
 import pickle
@@ -32,6 +34,72 @@ def variant_id_string(chrom, pos, ref, alt, use_chr_word=False):
     else:
         var_id_str = ':'.join([chrom, str(pos), ref, ("['" + alt + "']")])
     return var_id_str
+
+def generate_intervals_from_vcf(vcf,
+                                output=None,
+                                col_names=['#CHROM', 'POS', 'ID', 'REF', 'ALT'],
+                                dtypes={'#CHROM': 'str', 'POS': 'int32', 'ID': 'str', 'REF':'str', 'ALT':'str'}):
+    if isinstance(vcf, str):
+        vcf = pd.read_csv(vcf,
+                          sep='\t',
+                          dtype=dtypes,
+                          header= None,
+                          names=col_names,
+                          usecols=range(len(col_names)),
+                          comment='#')
+    elif not isinstance(sparse_matrix, pd.DataFrame):
+        raise ValueError("Input must be either a path to a vcf(.gz) file or an object of pd.DataFrame type.")
+    
+    intervals = {'chr': [], 'start': [], 'end': []}
+    for _, row in tqdm(vcf.iterrows(), total=vcf.shape[0]):
+        intervals['chr'].append(row['#CHROM'])
+        intervals['start'].append(row['POS'] - 1)
+        intervals['end'].append((row['POS'] - 1) + len(row['REF']))
+    
+    df = pd.DataFrame(intervals, index=range(len(intervals['chr'])))
+    df.sort_values(by=['chr', 'start'], inplace=True)
+    df.reset_index(drop=True, inplace=True)
+    if output is not None:
+        df.to_csv(output, sep='\t', index=None, header=None)
+    return df
+
+
+def concatenate_vcf_files(directory, filenames, output=None):
+    ext = "vcf.gz"
+    vcf = None
+    col_names = ['#CHROM', 'POS', 'ID', 'REF', 'ALT']
+    for fil in filenames:
+        f = os.path.join(directory, fil)
+        if vcf is None:
+            vcf = pd.read_csv(f, sep='\t', comment='#', names=col_names,
+                              dtype={0:'str',
+                                      1:'int32',
+                                      2:'str',
+                                      3:'str',
+                                      4:'str'})
+        else:
+            vcf = pd.concat([vcf, 
+                             pd.read_csv(f, sep='\t', comment='#', names=col_names,
+                                         dtype={0:'str',
+                                                 1:'int32',
+                                                 2:'str',
+                                                 3:'str',
+                                                 4:'str'})], ignore_index=True)
+        print(f)
+    # vcf.astype(dtype={'#CHROM':'object', 'POS':'int32', 'ID':'object', 'REF':'object', 'ALT':'object'})
+    vcf.sort_values(by=['#CHROM', 'POS'], inplace=True)
+    vcf.reset_index(drop=True, inplace=True)
+    
+    vcf["QUAL"] = ['.'] * vcf.shape[0]
+    vcf["FILTER"] = ['.'] * vcf.shape[0]
+    vcf["INFO"] = ['.'] * vcf.shape[0]
+    
+    if output is not None:
+        with open(output, 'w') as f:
+            f.write("##fileformat=VCFv4.0\n")
+        vcf.to_csv(output, sep='\t', index=None, mode='a')
+
+    return vcf
 
 def _write_worker(q, sync_pred_writer):
     """Writer loop
@@ -72,6 +140,7 @@ class AsyncSyncPredictionsWriter(SyncPredictonsWriter):
         Args:
           batch is one batch of data (nested numpy arrays with the same axis 0 shape)
         """
+        import time
         batch = (predictions, records, line_ids)
         while self.queue.qsize() > self.max_queue_size:
             print("WARNING: queue too large {} > {}. Blocking the writes".
@@ -179,13 +248,15 @@ class LmdbBatchWriter(SyncPredictonsWriter):
 
 cadd_files_dir = "/data/ouga/home/ag_gagneur/simancas/Projects/kipoi-veff/tests/models/var_seqlen_model/"
 training_dir_hg37 = "/s/project/kipoi-cadd/data/raw/v1.4/training_data/GRCh37"
+var_ids = os.path.join(training_dir_hg37, "variant_ids", "all.pkl")
 intervals_file = os.path.join(training_dir_hg37, "intervals.tsv")
 fasta_file = "/s/genomes/human/hg19/ensembl_GRCh37.p13_release75/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa"
-vcf_file = os.path.join(training_dir_hg37, "all.vcf.gz")
+vcf_file = os.path.join(training_dir_hg37, "all.vcf")
 lmdb_deep_sea = os.path.join(training_dir_hg37, "lmdb/lmdb_DeepSea_veff")
 
 model = get_model("DeepSEA/variantEffects")
-dl_kwargs = {'intervals_file': intervals_file, 'fasta_file': fasta_file, 'num_chr_fasta': True}
+# dl_kwargs = {'intervals_file': intervals_file, 'fasta_file': fasta_file, 'num_chr_fasta': True}
+dl_kwargs = {'fasta_file': fasta_file, 'num_chr_fasta': True}
 dataloader = model.default_dataloader
 
 # num_lines = len(load_pickle(os.path.join(training_dir_hg37, "variant_ids/all.pkl")))
@@ -194,12 +265,27 @@ lmdb_writer = LmdbBatchWriter(lmdb_deep_sea, "DeepSea_veff", 274578419865)
 writer = SyncBatchWriter(AsyncSyncPredictionsWriter(lmdb_writer))
 
 if __name__ == "__main__":
-    sp.predict_snvs(model,
-                dataloader,
-                vcf_file,
-                16,
+    if not os.path.isfile(vcf_file):
+        print("Merging vcf files...")
+        filenames = [
+            "humanDerived_InDels.vcf.gz",
+            "humanDerived_SNVs.vcf.gz",
+            "simulation_InDels.vcf.gz",
+            "simulation_SNVs.vcf.gz",
+        ]
+        concatenate_vcf_files(training_dir_hg37, filenames, output=vcf_file)
+
+    """
+    if not os.path.isfile(intervals_file):
+        print("Generating intervals file...")
+        generate_intervals_from_vcf(vcf_file, intervals_file)
+    """
+    
+    print("Start predictions..")
+    sp.score_variants(model=model,
+                input_vcf=vcf_file,
+                batch_size=16,
                 num_workers=64,
-                dataloader_args=dl_kwargs,
-                evaluation_function_kwargs={'diff_types': {'logit': Logit()}},
-                return_predictions=False,
-                sync_pred_writer=writer)
+                dl_args=dl_kwargs,
+                output_writers=writer)
+    
