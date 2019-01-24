@@ -246,6 +246,63 @@ def load_csv_chunks_tosparse(filename, chunksize, dtype, num_lines, output=None,
         save_npz(output, full_matrix)
     
 
+def reorder_vcf(input_vcf, row_ids, output_vcf, discard_metadata=False):
+    """Re-order the vcf file. Note: the output vcf 
+    
+    Args:
+      input_vcf: path to a vcf file
+      row_ids List[int]: a list of integer numbers or a path 
+        to a .txt file containing the shuffled rows
+      output_vcf: output vcf file path
+      discard_metadata: if True, the INFO field of the vcf is ignored
+    """
+    if isinstance(row_ids, str):
+        row_ids = load_pickle(row_ids)
+    
+    colnames = ""
+    with open(input_vcf, 'r') as f:
+        for l in f.readlines():
+            if "#CHROM" in l:
+                colnames=l.replace("\n", "").split("\t")
+                break
+    
+    vcf_df = pd.read_csv(input_vcf, sep="\t", header=None, names=colnames, comment="#")
+    vcf_df = vcf_df.loc[row_ids]
+       
+    if discard_metadata:
+        vcf_df.drop(columns=['ID', 'QUAL', 'FILTER', 'INFO'], inplace=True)
+        header = "##fileformat=VCFv4.0\n"
+        with open(output_vcf, 'w') as f:
+            f.write(header)
+        vcf_df.to_csv(output_vcf, sep="\t", mode='a', index=None)
+    else:
+        header_lines = ""
+        with open(input_vcf, 'r') as f:
+            for l in f.readlines():
+                if l.startswith("#"): header_lines += l
+        with open(output_vcf, 'w') as f:
+            f.write(header_lines)
+        vcf_df.to_csv(output_vcf, sep="\t", mode='a', header=None, index=None)
+
+
+def reorder_sparse_matrix(input_npz, row_ids, output_npz):
+    from scipy.sparse import load_npz, save_npz
+    """Re-order the vcf file. Note: the output vcf 
+    
+    Args:
+      input_npz: path to a .npz file
+      row_ids List[int]: a list of integer numbers or a path 
+        to a .txt file containing the shuffled rows
+      output_npz: output .npz file path
+    """
+    if isinstance(row_ids, str):
+        row_ids = load_pickle(row_ids)
+    
+    npz = load_npz(input_npz)
+    npz = npz[row_ids]
+    save_npz(output_npz, npz)
+
+
 def put_batches(csv_file, lmdb_batched_dir, batch_size=256, separator=','):
     with open(variant_ids, 'rb') as f:
         varids = pickle.load(f)

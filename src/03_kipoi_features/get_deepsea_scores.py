@@ -1,7 +1,9 @@
 # Standalone script
 import kipoi_veff.snv_predict as sp
 from kipoi_veff.scores import Logit
+from pathlib import Path
 from kipoi import get_model
+import argparse
 import os
 import pyarrow as pa
 from kipoi_veff.utils.io import SyncPredictonsWriter, SyncBatchWriter
@@ -86,7 +88,6 @@ def concatenate_vcf_files(directory, filenames, output=None):
                                                  3:'str',
                                                  4:'str'})], ignore_index=True)
         print(f)
-    # vcf.astype(dtype={'#CHROM':'object', 'POS':'int32', 'ID':'object', 'REF':'object', 'ALT':'object'})
     vcf.sort_values(by=['#CHROM', 'POS'], inplace=True)
     vcf.reset_index(drop=True, inplace=True)
     
@@ -98,7 +99,6 @@ def concatenate_vcf_files(directory, filenames, output=None):
         with open(output, 'w') as f:
             f.write("##fileformat=VCFv4.0\n")
         vcf.to_csv(output, sep='\t', index=None, mode='a')
-
     return vcf
 
 def _write_worker(q, sync_pred_writer):
@@ -246,46 +246,39 @@ class LmdbBatchWriter(SyncPredictonsWriter):
         if hasattr(self, 'env'):
             self.env.close()
 
-cadd_files_dir = "/data/ouga/home/ag_gagneur/simancas/Projects/kipoi-veff/tests/models/var_seqlen_model/"
-training_dir_hg37 = "/s/project/kipoi-cadd/data/raw/v1.4/training_data/GRCh37"
-var_ids = os.path.join(training_dir_hg37, "variant_ids", "all.pkl")
-intervals_file = os.path.join(training_dir_hg37, "intervals.tsv")
-fasta_file = "/s/genomes/human/hg19/ensembl_GRCh37.p13_release75/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa"
-vcf_file = os.path.join(training_dir_hg37, "all.vcf")
-lmdb_deep_sea = os.path.join(training_dir_hg37, "lmdb/lmdb_DeepSea_veff")
-
-model = get_model("DeepSEA/variantEffects")
-# dl_kwargs = {'intervals_file': intervals_file, 'fasta_file': fasta_file, 'num_chr_fasta': True}
-dl_kwargs = {'fasta_file': fasta_file, 'num_chr_fasta': True}
-dataloader = model.default_dataloader
-
-# num_lines = len(load_pickle(os.path.join(training_dir_hg37, "variant_ids/all.pkl")))
-# map_size = calculate_map_size(ds[0], num_lines, 1.9)
-lmdb_writer = LmdbBatchWriter(lmdb_deep_sea, "DeepSea_veff", 274578419865)
-writer = SyncBatchWriter(AsyncSyncPredictionsWriter(lmdb_writer))
 
 if __name__ == "__main__":
-    if not os.path.isfile(vcf_file):
-        print("Merging vcf files...")
-        filenames = [
-            "humanDerived_InDels.vcf.gz",
-            "humanDerived_SNVs.vcf.gz",
-            "simulation_InDels.vcf.gz",
-            "simulation_SNVs.vcf.gz",
-        ]
-        concatenate_vcf_files(training_dir_hg37, filenames, output=vcf_file)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('vcf')
+    parser.add_argument('--output-dir', default="/s/project/kipoi-cadd/data/models/DeepSea_veff")
+    parser.add_argument("--writer", default="zarr")
+    args = parser.parse_args()
+    
+    fasta_file = "/s/genomes/human/hg19/ensembl_GRCh37.p13_release75/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa"
 
-    """
-    if not os.path.isfile(intervals_file):
-        print("Generating intervals file...")
-        generate_intervals_from_vcf(vcf_file, intervals_file)
-    """
+    model = get_model("DeepSEA/variantEffects")
+    dl_kwargs = {'fasta_file': fasta_file, 'num_chr_fasta': True}
+    output_dir = Path(args.output_dir)
+    output_name = os.path.basename(args.vcf).split('.vcf')[0]
+
+    if args.writer == "zarr":
+        from kipoi.writers import ZarrBatchWriter, AsyncBatchWriter
+        td = output_name + ".zarr"
+        writer = SyncBatchWriter(AsyncBatchWriter(ZarrBatchWriter(str(output_dir / td), chunk_size=1024)))
+    elif args.writer == "lmdb":
+        td = output_name + ".lmdb"
+        writer = SyncBatchWriter(AsyncSyncPredictionsWriter(
+            LmdbBatchWriter(str(output_dir / td), "DeepSea_veff", 274578419865)))
+    elif args.writer == "hdf5":
+        td = output_name + ".hdf5"
+        from kipoi.writers import HDF5BatchWriter
+        writer = SyncBatchWriter(HDF5BatchWriter(str(output_dir / td)))
     
     print("Start predictions..")
     sp.score_variants(model=model,
-                input_vcf=vcf_file,
+                input_vcf=args.vcf,
                 batch_size=16,
-                num_workers=64,
+                num_workers=10,
                 dl_args=dl_kwargs,
                 output_writers=writer)
     

@@ -115,11 +115,14 @@ def generate_intervals_from_vcf(vcf,
     return df
 
 
-def concatenate_vcf_files(directory, output=None):
+def concatenate_vcf_files(directory, filenames, output=None):
+    import os
+
     ext = "vcf.gz"
     vcf = None
     col_names = ['#CHROM', 'POS', 'ID', 'REF', 'ALT']
-    for f in get_all_files_extension(training_dir_hg37, ext):
+    for fil in filenames:
+        f = os.path.join(directory, fil)
         if vcf is None:
             vcf = pd.read_csv(f, sep='\t', comment='#', names=col_names,
                               dtype={0:'str',
@@ -139,9 +142,17 @@ def concatenate_vcf_files(directory, output=None):
     # vcf.astype(dtype={'#CHROM':'object', 'POS':'int32', 'ID':'object', 'REF':'object', 'ALT':'object'})
     vcf.sort_values(by=['#CHROM', 'POS'], inplace=True)
     vcf.reset_index(drop=True, inplace=True)
+    
+    vcf["QUAL"] = ['.'] * vcf.shape[0]
+    vcf["FILTER"] = ['.'] * vcf.shape[0]
+    vcf["INFO"] = ['.'] * vcf.shape[0]
+    
     if output is not None:
-        vcf.to_csv(os.path.join(training_dir_hg37, "all.vcf.gz"), sep='\t', index=None)
-    return vcf
+        with open(output, 'w') as f:
+            f.write("##fileformat=VCFv4.0\n")
+        vcf.to_csv(output, sep='\t', index=None, mode='a')
+    else:
+        return vcf
 
 
 def generate_variant_ids(inputfile, outputfile, separator='\t',
@@ -225,4 +236,3 @@ def get_dtypes_info(dtype):
         return (np.finfo(dtype).min, np.finfo(dtype).max)
     else:
         return (np.iinfo(dtype).min, np.iinfo(dtype).max)
-

@@ -107,6 +107,114 @@ class SklearnTrainer:
             self.cometml_experiment.log_multiple_metrics(flatten(metric_res), prefix="best/")
 
         return metric_res
+    
+
+@gin.configurable
+class KipoiCaddBatchTrainer:
+    """Simple Scikit Learn model trainer
+    """
+
+    def __init__(self, model, train_datasets, output_dir, valid_datasets=None, cometml_experiment=None):
+        """
+        Args:
+          model: 
+          train_datasets, valid_datasets: list of datasets or readers: ojbects with method batch_iter
+          output_dir: output directory where to log the training
+          cometml_experiment: if not None, append logs to commetml
+        """
+        self.model = model
+        self.train_datasets = train_datasets
+        self.train_iterators = self.valid_iterators = []
+        self.cometml_experiment = cometml_experiment
+
+        # setup the output directory
+        self.output_dir = output_dir
+        os.makedirs(self.output_dir, exist_ok=True)
+        self.ckp_file = f"{self.output_dir}/model.h5"
+        if os.path.exists(self.ckp_file):
+            raise ValueError(f"model.h5 already exists in {self.output_dir}")
+        self.history_path = f"{self.output_dir}/history.csv"
+        self.evaluation_path = f"{self.output_dir}/evaluation.valid.json"
+
+    def train(self,
+              coef_init=None,
+              intercept_init=None,
+              sample_weight=None,
+              batch_size=64,
+              num_batches=1,
+              shuffle=True,
+              num_workers=10):
+        """Train the model
+        Args:
+          batch_size:
+          num_workers: how many workers to use in parallel
+        """
+        from sklearn.externals import joblib
+
+        print("Started loading iterators and training set")
+        for d in self.train_datasets:
+            self.train_iterators.append(d.batch_train_iter(batch_size=batch_size))
+        
+        print("Loading and training")
+        for batch_num in tqdm(range(num_batches)):
+            X_batch = None
+            for it in self.train_iterators:
+                # Connecting features from all kipoi datasets
+                # we assume that the variants have been curated,
+                # i.e. the same in the exact order.
+                if X_batch is None:
+                    # The first batch should be CADD's batch and batch_train_iter
+                    # will return a tuple of X and y.
+                    X_batch = next(it)
+                    if isinstance(X_batch, tuple):
+                        X_batch, y_batch = X_batch
+                else:
+                    t = next(it)
+                    print(t.shape, X_batch.shape)
+                    X_batch = np.concatenate((X_batch, t), axis=1)
+            self.model.train_on_batch(X_batch, y_batch,
+                                      sample_weight=sample_weight)
+        
+        joblib.dump(self.model, self.ckp_file)
+
+
+    def evaluate(self, batch_size=256, shuffle=True, num_workers=8, save=True):
+        """Evaluate the model on the validation set
+        Args:
+          metrics: a list or a dictionary of metrics
+          batch_size:
+          num_workers:
+        """
+        print("Started loading validation dataset")
+        for d in self.valid_datasets:
+            self.valid_datasets.append(d.batch_iter(batch_size))
+        
+        batch = None
+        metric_res_b = []
+        print("Loading and training")
+        for batch_num in tqdm(enumerate(len(self.valid_datasets[0]))):
+            for it in self.valid_datasets:
+                # Connecting features from all kipoi datasets
+                # we assume that the variants have been curated,
+                # i.e. the same in the exact order.
+                if batch is None:
+                    batch = next(it)
+                else:
+                    batch = np.concatenate(batch, next(it), axis=1)
+            X_batch, y_batch = batch[:, 1:], batch[:,0]
+            metric_res_b.append(self.model.test_on_batch(X_batch,
+                                y_batch,
+                                sample_weight=sample_weight))
+        
+        metric_res = np.average(metric_res_b)
+
+        if save:
+            write_json(metric_res, self.evaluation_path, indent=2)
+
+        if self.cometml_experiment:
+            self.cometml_experiment.log_multiple_metrics(flatten(metric_res), prefix="best/")
+
+        return metric_res
 
 
 class SklearnLogisticRegressionTrainer:

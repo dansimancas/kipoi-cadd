@@ -11,6 +11,7 @@ import pickle
 import pandas as pd
 import sys
 from kipoi_cadd.utils import load_pickle, dump_to_pickle
+from kipoi.readers import ZarrReader
 import logging
 from tqdm import tqdm, trange
 import time
@@ -102,6 +103,49 @@ class Dataset(BaseDataLoader):
                 (default: 1).
         """
         return numpy_collate_concat([x for x in tqdm(self.batch_iter(batch_size, **kwargs))])
+
+
+class BatchDataset(BaseDataLoader):
+    """An abstract class representing a BatchDataset.
+    """
+
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractmethod
+    def __getitem__(self, index):
+        """Return one batch
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def __len__(self):
+        """Number of all batches
+        """
+        raise NotImplementedError
+
+    def _batch_iterable(self, num_workers=0, **kwargs):
+        """Return a batch-iteratorable
+        See batch_iter for docs
+        """
+        dl = DataLoader(self, batch_size=1,
+                        collate_fn=numpy_collate_concat,
+                        shuffle=False,
+                        num_workers=num_workers,
+                        drop_last=False)
+        return dl
+
+    def batch_iter(self, num_workers=0, **kwargs):
+        """Return a batch-iterator
+        Arguments:
+            dataset (Dataset): dataset from which to load the data.
+            num_workers (int, optional): how many subprocesses to use for data
+                loading. 0 means that the data will be loaded in the main process
+                (default: 0)
+        Returns:
+            iterator
+        """
+        dl = self._batch_iterable(num_workers=num_workers, **kwargs)
+        return iter(dl)
 
 
 @gin.configurable
@@ -292,6 +336,139 @@ class KipoiLmdbDataset(Dataset):
         return pd.DataFrame(annos, index=[var_ids], columns=self._column_names)
 
 
+class MatrixDataset(BatchDataset):
+    def __init__(self, matrix, target_column=None, batch_size=64):
+        self.matrix = matrix
+        self.target_column = target_column
+        self.batch_size = batch_size
+
+    def __len__(self):
+        # int(np.ceil(len(self.input_array) / batch_size))
+        # NOTE: the final incomplete batch will be ignored
+        return len(self.matrix) // self.batch_size
+
+    def __getitem__(self, idx):
+        assert idx < len(self)
+        sl = slice(idx * self.batch_size, (idx+1) * self.batch_size)
+        inp = self.matrix[sl]
+        if isinstance(inp, csr_matrix):
+            inp = inp.toarray()
+
+        if self.target_column is None:
+            return {"inputs": inp}
+        else:
+            return {"inputs": inp[:, np.arange(inp.shape[1]) != self.target_column],
+                    "targets": inp[:, self.target_column]}
+
+
+class HStackBatchDataset(BatchDataset):
+
+    def __init__(self, batch_datasets):
+        """
+        Args:
+          batch_datasets: list of BatchDatasets with the same length and
+            each batch_dataset should return under "inputs" a 2d matrix. 
+            all matrices should have the same length
+            At most one of the batch_datasets should provide the target
+        """
+        self.batch_datasets = batch_datasets
+        lens = {len(d) for d in self.batch_datasets}
+        assert len(lens) == 1
+
+    def __len__(self):
+        return len(self.batch_datasets[0])
+
+    def __getitem__(self, idx):
+        inputs = []
+        targets = None
+        # NOTE: we ignore the metadata
+        batch_dim = None
+        for bd in self.batch_datasets:
+            batch = bd[idx]  # query the batch_dataset
+            
+            # handle targets
+            if 'targets' in batch:
+                if targets is None:
+                    targets = batch['targets']
+                else:
+                    raise ValueError("Only a single batch dataset"
+                                     " should provide targets")
+
+            # handle inputs
+            m = batch['inputs']
+            assert m.ndim == 2
+            if batch_dim is None:
+                batch_dim = len(m)
+            else:
+                if len(m) != batch_dim:
+                    raise ValueError(f"Batch dimension not the same: {len(m)} != {batch_dim}")
+            inputs.append(m)
+            # NOTE: metadata is ignored
+        # stack the matrices
+        inputs = np.concatenate(inputs, axis=1)
+
+        out = {"inputs": inputs}
+        if targets is not None:
+            out["targets"] = targets
+        return out
+
+
+class CaddSparseBatchDataset(BatchDataset):
+    def __init__(self, npz_file, target_column, batch_size=64):
+        self.batch_dataset = MatrixDataset(load_npz(npz_file), 
+                                           target_column, 
+                                           batch_size=batch_size)
+
+    def __len__(self):
+        return len(self.batch_dataset)
+
+    def __getitem__(self, idx):
+        return self.batch_dataset[idx]
+
+
+class ZarrBatchDataset(BatchDataset):
+    def __init__(self, zarr_file, inputs_fields, batch_size=64):
+        ## inputs_field: 'preds/logit_diff'
+        self.zarr_file = zarr_file
+        self.f = ZarrReader(self.zarr_file)
+        self.f.open()
+        self.batch_dataset = HStackBatchDataset([MatrixDataset(self.f.root[field], batch_size=batch_size)
+                                                 for field in inputs_fields])
+    def __len__(self):
+        return len(self.batch_dataset)
+
+    def __getitem__(self, idx):
+        return self.batch_dataset[idx]
+
+
+# kipoicadd.dataset.yaml:
+
+# {"cadd_sparse_matrix: PATH
+# {kipoi_zarr:
+#   - path: ...deepSEA.zarr
+#     input_fields:
+#       - pred/diff
+#   - path: ...deepbind.zarr
+#     input_fields:
+#       - pred/diff
+
+
+class KipoiCaddBatchDataset(BatchDataset):
+    def __init__(self, batch_datasets):
+        """
+        Args:
+          batch_datasets: list of batch_datasets or readers. Objects with method __getitem__.
+        """
+        self.batch_datasets = HStackBatchDataset([ds for ds in batch_datasets])
+
+
+    def __len__(self):
+        # Assuming the datasets have been curated
+        return len(self.batch_datasets[0])
+
+    def __getitem__(self, idx):
+        return batch_datasets[idx]
+
 class KipoiCaddLmdbDataset(Dataset):
     def __init__ (self, lmdb_dirs_list, variant_ids_file, version="1.3", hg_assembly="GRCh37"):
         self.version = version
@@ -355,6 +532,44 @@ class KipoiCaddLmdbDataset(Dataset):
 
     def get_column_names(self):
         return self._column_names
+
+
+class KipoiCaddDataset(Dataset):
+    def __init__(self, datasets):
+        """
+        Args:
+          datasets: list of datasets or readers. Objects with method batch_train_iter.
+        """
+        self.datasets = datasets
+        self.iterators = []
+
+    def __len__(self):
+        # Assuming the datasets have been curated
+        return self.datasets[0].__len__()
+
+    def batch_iter(self, batch_size=32, **kwargs):
+        return NotImplementedError
+
+    def batch_train_iter(self, batch_size=32,**kwargs):
+        for d in self.datasets:
+            self.iterators.append(d.batch_train_iter(batch_size=batch_size))
+
+        num_batches = 1
+        for batch_num in tqdm(range(num_batches)):
+            X_batch = None
+            for it in self.iterators:
+                # Connecting features from all kipoi datasets
+                # we assume that the variants have been curated,
+                # i.e. the same in the exact order.
+                if X_batch is None:
+                    # The first batch should be CADD's batch and batch_train_iter
+                    # will return a tuple of X and y.
+                    X_batch = next(it)
+                    if isinstance(X_batch, tuple):
+                        X_batch, y_batch = X_batch
+                else:
+                    X_batch = np.concatenate((X_batch, next(it)), axis=1)
+                    yield X_batch, y_batch
 
 
 def train_test_split_indexes(variant_id_file, test_size, random_state=1):

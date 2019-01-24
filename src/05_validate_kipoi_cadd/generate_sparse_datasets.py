@@ -10,19 +10,20 @@ import numpy as np
 import os
 
 VALIDATION_DATA_FILES = [
-    "clinvar_20180729_pathogenic_all_GRCh37"
+    "sample_chr22_GRCh37"
 ]
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("input_dir", help="Validation directory.")
+    parser.add_argument("input_dir", help="Input directory.")
     parser.add_argument("output_dir", help="Output directory.")
     parser.add_argument("--split", default=False, action='store_true')
     parser.add_argument("--scaler-path", type=str, default=None)
     args = parser.parse_args()
 
+    print("Got args:")
     for arg in vars(args):
-        print(arg, getattr(args, arg))
+        print("\t" + arg + ":", getattr(args, arg))
 
     training_dir = args.input_dir
     output_dir = args.output_dir
